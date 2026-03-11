@@ -1,0 +1,296 @@
+23. Plant Disease Detection System
+
+The platform will provide AI-powered crop disease detection to help farmers identify plant diseases early and take corrective action.
+
+Farmers can detect diseases through:
+
+Mobile App Plant Scanner
+
+WhatsApp Image Upload
+
+Both methods will use AI image analysis combined with location-based weather data to generate an accurate report.
+
+23.1 Feature Objectives
+
+The objective of this feature is to:
+
+Help farmers identify crop diseases early
+
+Provide recommended treatments
+
+Reduce crop losses
+
+Use weather data and humidity conditions to improve disease detection accuracy
+
+23.2 Disease Detection Methods
+1. Mobile App Plant Scanner
+
+Users can detect plant diseases directly inside the mobile application.
+
+Flow
+
+Step 1
+User opens Plant Scanner feature in the app.
+
+Step 2
+Camera opens and the farmer scans the plant.
+
+Step 3
+AI analyzes the image.
+
+Step 4
+The system identifies:
+
+Crop type
+
+Disease type
+
+Infection severity
+
+Step 5
+The farmer receives a detailed report.
+
+Report Includes
+
+Disease Name
+
+Probability Score
+Example:
+Early Blight – 92% confidence
+
+Affected Area
+
+Severity Level
+
+Mild
+
+Moderate
+
+Severe
+
+Treatment Recommendations
+
+Example:
+
+Organic treatment
+
+Chemical treatment
+
+Preventive measures
+
+Nearby Agricultural Stores
+
+Recommended fertilizers / pesticides
+
+23.3 WhatsApp Disease Detection
+
+Farmers can also detect diseases using WhatsApp, which is useful for farmers who may not use the app regularly.
+
+Flow
+
+Step 1
+Farmer sends a plant image to the platform's WhatsApp number.
+
+Step 2
+WhatsApp chatbot responds with instructions.
+
+Example:
+
+"Please enable location sharing and send your plant photo."
+
+Step 3
+User shares:
+
+Plant image
+
+Location
+
+Step 4
+AI system processes the image.
+
+Step 5
+User receives a detailed disease report via WhatsApp.
+
+23.4 Location Requirement
+
+To improve accuracy, location must be enabled.
+
+Location is used to gather environmental conditions such as:
+
+Temperature
+
+Humidity
+
+Rainfall
+
+Soil moisture
+
+Seasonal crop diseases common in that area
+
+This improves AI prediction accuracy.
+
+23.5 Weather Data Integration
+
+The system collects weather data from APIs based on the user's location.
+
+Weather parameters used:
+
+Temperature
+
+Humidity
+
+Rainfall
+
+Wind speed
+
+Moisture levels
+
+These parameters help determine:
+
+Disease likelihood
+
+Spread probability
+
+Suitable treatment
+
+23.6 Disease Intelligence Engine
+
+The AI system will combine:
+
+Image recognition
+
+Weather data
+
+Crop database
+
+Regional disease patterns
+
+To generate the final diagnosis.
+
+23.7 Disease Database
+
+The system will support disease detection for crops such as:
+
+Cotton
+
+Rice
+
+Tomato
+
+Chilli
+
+Maize
+
+Wheat
+
+Vegetables
+
+The disease library will include:
+
+Leaf diseases
+
+Fungal infections
+
+Pest infestations
+
+Nutrient deficiencies
+
+23.8 Example Report
+
+Example output to farmer:
+
+Crop
+Cotton
+
+Detected Issue
+Leaf Curl Disease
+
+Confidence
+91%
+
+Severity
+Moderate
+
+Weather Conditions
+High humidity detected in your region.
+
+Recommended Action
+
+Remove infected leaves
+
+Apply recommended pesticide
+
+Avoid over-irrigation
+
+Nearby Mandi Advisory
+Check cotton prices in nearby markets before harvest.
+
+23.9 Notifications
+
+If a disease outbreak is detected in a region:
+
+The platform will send alerts to nearby farmers.
+
+Example:
+
+"Tomato Leaf Blight detected in Nalgonda region. Please monitor your crop."
+
+Notifications sent via:
+
+Mobile Push Notifications
+
+SMS
+
+WhatsApp
+
+23.10 Data Storage
+
+The system will store:
+
+Crop image
+
+Disease results
+
+Location data
+
+Weather conditions
+
+Treatment recommendations
+
+This data will be used for:
+
+Disease trend analysis
+
+AI model improvement
+
+Regional outbreak detection
+
+23.11 Benefits
+
+For Farmers
+
+Early disease detection
+
+Better crop yield
+
+Reduced pesticide misuse
+
+For Platform
+
+Agricultural intelligence data
+
+Regional disease insights
+
+AI training dataset
+
+23.12 Future Enhancements
+
+Voice-based disease reporting
+
+Video-based crop diagnosis
+
+Drone crop scanning integration
+
+Predictive disease alerts before outbreak
+
+Integration with agricultural universities for expert validation

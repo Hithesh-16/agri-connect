@@ -1,0 +1,1016 @@
+Product Documentation (Mobile App)
+1. Product Overview
+The platform is a mobile application for farmers, traders, dealers, and corporates that provides:
+Live crop prices across mandis
+
+
+Weather alerts
+
+
+Crop selling opportunities
+
+
+Market demand information
+
+
+Direct connectivity with dealers, mills, and corporates
+
+
+The objective is to reduce middlemen inefficiencies and increase farmer profit by providing transparent market prices and direct buyer connections.
+
+2. Agricultural Categories
+The application will support the following agricultural product categories.
+
+2.1 Vegetables
+Leafy Greens
+Spinach
+
+
+Kale
+
+
+Lettuce
+
+
+Swiss Chard
+
+
+Cruciferous Vegetables
+Broccoli
+
+
+Cauliflower
+
+
+Brussels Sprouts
+
+
+Cabbage
+
+
+Root Vegetables
+Carrots
+
+
+Beets
+
+
+Radishes
+
+
+Turnips
+
+
+Bulbs
+Onions
+
+
+Garlic
+
+
+Shallots
+
+
+Leeks
+
+
+Fruiting Vegetables
+Tomatoes
+
+
+Peppers
+
+
+Eggplants
+
+
+Cucumbers
+
+
+Legumes
+Beans
+
+
+Peas
+
+
+Lentils
+
+
+Chickpeas
+
+
+Stems and Shoots
+Asparagus
+
+
+Celery
+
+
+Rhubarb
+
+
+Tubers
+Potatoes
+
+
+Sweet Potatoes
+
+
+Yams
+
+
+Gourd Family
+Squash
+
+
+Pumpkins
+
+
+Zucchini
+
+
+Mushrooms
+(Technically fungi but categorized as vegetables in the application)
+
+2.2 Cereals
+Wheat
+
+
+Rice (White, Brown, Basmati)
+
+
+Corn (Maize)
+
+
+Barley
+
+
+Oats
+
+
+Sorghum
+
+
+Millet
+
+
+
+2.3 Pulses
+Lentils
+
+
+Chickpeas
+
+
+Beans
+
+
+Kidney Beans
+
+
+Black Beans
+
+
+Pinto Beans
+
+
+Navy Beans
+
+
+Peas
+
+
+Dry Peas
+
+
+Black-eyed Peas
+
+
+
+2.4 Herbs & Spices
+Example brands/clients:
+Example products
+Ashirwad
+Mirchi powder
+
+
+Coriander powder
+
+
+
+3. Supply Chain Ecosystem
+The platform connects multiple stakeholders.
+Stakeholders
+Farmers
+
+
+Traders
+
+
+Dealers
+
+
+Corporates
+
+
+Cotton Mills
+
+
+Consumers
+
+
+
+Retail Platforms
+Examples:
+DMart
+
+
+Instamart
+
+
+Blinkit
+
+
+Ratnadeep
+
+
+Example product:
+Kulla Rice
+
+
+25kg bags
+
+
+
+4. Pricing Structure
+The platform should track multiple price types.
+Village Farmer
+Selling price
+
+
+Dealers / Clients
+Cost price
+
+
+Dealer margin
+
+
+Consumers
+Retail price
+
+
+The platform should display:
+Farm gate price
+
+
+Dealer purchase price
+
+
+Market mandi price
+
+
+Retail consumer price
+
+
+
+5. eNAM Integration
+Information requested by stakeholders:
+Questions to Address
+Trader onboarding in eNAM
+How traders can register
+
+
+Documentation required
+
+
+License requirements
+
+
+Seller registration in eNAM
+Login process
+
+
+Required certifications
+
+
+
+6. User Registration Flow
+Step 1: Authentication
+Two methods:
+Method 1: Aadhaar Authentication
+Input field:
+Aadhaar Number
+
+
+Option:
+Scan Aadhaar Card
+
+
+After scan:
+Aadhaar number auto populated
+
+
+
+Method 2: Mobile Number Authentication
+If Aadhaar authentication fails:
+Register with Mobile Number
+
+
+
+Step 2: OTP Verification
+Process:
+User enters mobile number
+
+
+OTP sent to mobile
+
+
+User enters OTP
+
+
+OTP verification
+
+
+Features:
+Resend OTP option
+
+
+
+7. Personal Information Screen
+If Aadhaar verified:
+Fields auto populated.
+If mobile registration:
+User must enter manually.
+
+Required Fields
+Profile Photo
+Upload latest image
+
+
+Aadhaar Number
+Auto populated (if Aadhaar used)
+
+
+Mobile Number
+Required
+
+
+Alternate Mobile Number
+First Name
+Surname
+Address Fields
+House No
+
+
+Street
+
+
+Village
+
+
+Post
+
+
+Mandal
+
+
+District
+
+
+State
+
+
+Country
+
+
+Date of Birth
+Gender
+Male
+
+
+Female
+
+
+Others
+
+
+Location
+Latitude
+
+
+Longitude
+
+
+Obtained via Aadhaar API
+
+
+Consent Checkbox
+"Want to receive updates from our application?"
+Language Selection
+
+Validation
+All required fields validated.
+Once validation succeeds:
+User proceeds to next step.
+
+8. Crop Selection
+User must select minimum 2 crops.
+Display format:
+Grid View
+Each item shows:
+Crop image
+
+
+Crop label
+
+
+Example:
+Cotton
+
+
+Rice
+
+
+Maize
+
+
+Wheat
+
+
+Chili
+
+
+
+9. Mandi Selection
+The application will show nearest Mandis.
+Selection criteria:
+Within 100 km
+
+
+Within 200 km
+
+
+Display format:
+Grid view or list view.
+Users can select multiple mandis.
+
+10. Registration Completion
+After completion:
+User receives updates via:
+Push Notifications
+
+
+SMS
+
+
+WhatsApp
+
+
+User redirected to:
+Dashboard / Home Screen
+
+11. Login Flow
+Authentication:
+Mobile Number + OTP
+Steps:
+Enter mobile number
+
+
+Receive OTP
+
+
+Enter OTP
+
+
+Login
+
+
+
+Session Management
+Session expiry:
+20 days of inactivity.
+
+12. Dashboard / Home Screen
+First login:
+Application tour will be shown.
+Purpose:
+Explain features to the user.
+
+12.1 Weather Information
+Displayed at top.
+Information includes:
+Rain
+
+
+Moisture
+
+
+Sunny
+
+
+Cool weather
+
+
+Weather alerts sent via:
+Push notifications
+
+
+Platform messaging
+
+
+
+12.2 Crop Price Highlights
+Display:
+Highest price for selected crops across selected mandis.
+Also show:
+Nearby mandis.
+
+12.3 Agricultural News
+Section displaying:
+Farming news
+
+
+Market trends
+
+
+Policy updates
+
+
+
+13. Live Market Prices
+Users can view real-time prices.
+View formats:
+List View
+Crop
+
+
+Market
+
+
+Price
+
+
+Volume
+
+
+Map View
+Mandis shown on map.
+Users can:
+Tap market
+
+
+View crop prices
+
+
+
+14. Cotton Supply Chain (Field Research)
+Meeting:
+24/12/2024
+ Chityala Mill
+ Discussion with Balu
+
+Cotton Procurement Flow
+Step 1
+Farmers sell cotton.
+Buyers:
+CCI
+
+
+Private dealers
+
+
+
+Step 2
+Price determined by:
+MSP
+
+
+Moisture content
+
+
+Quality parameters
+
+
+
+Step 3
+Cotton Manufacturing Unit
+Process:
+Raw cotton → Cotton Bales
+Process includes:
+Cotton separation
+
+
+Seed separation
+
+
+
+Step 4
+Buyers of Cotton Bales
+Corporates
+Example companies:
+Vardaman Textiles
+
+
+Arvind Textiles
+
+
+Gima
+
+
+
+Step 5
+Final products
+Corporates convert cotton bales into:
+Threads
+
+
+Fabrics
+
+
+Cloth
+
+
+
+Cotton Bale Market
+Most cotton bales sold to:
+Rajasthan
+
+
+Gujarat
+
+
+
+15. Cotton Seeds Business
+Cotton seeds also sold.
+Buyers:
+Oil manufacturers
+Method:
+Auction
+Auction platform:
+ENVIDA
+
+16. Cotton Price Determination Platforms
+Cotton prices influenced by global exchanges.
+Commodity Exchanges
+NCDEX
+ Indian commodity exchange
+Cotton seed code:
+COCUDAKL
+International Exchanges
+NYBOT
+ New York cotton exchange
+ZCE
+ China Zhengzhou Commodity Exchange
+
+17. Financing Platforms
+RXIL
+Backed by:
+RBI
+Purpose:
+MSME invoice discounting platform.
+
+18. Pain Points of Cotton Manufacturing Units
+1 Continuous Operations
+Cotton mills must run 24 hours.
+Needs constant cotton supply.
+
+2 Dependency on Farmers
+Farmers must sell cotton to mill.
+If CCI intervenes:
+CCI buys cotton.
+Mill processes cotton.
+
+3 Payment Issues
+Payments must be done immediately.
+Delay disrupts operations.
+
+4 Storage and Auction
+After processing:
+Cotton bales stored in godowns.
+Then:
+Sold
+
+
+Auctioned
+
+
+
+19. Cotton Bale Quality Parameters
+Parameters provided by Chityala Mill.
+Staple
+130.5 mm
+Micronaire
+4 mm
+RD
+77
+Strength
+23+ GTEX
+
+20. Corporate Onboarding Condition
+Chityala mill is ready to onboard if platform connects them with corporates such as:
+Vardaman Textiles
+
+
+Arvind Textiles
+
+
+Gima
+
+
+
+21. Core App Value
+The platform will enable:
+Farmers to see real mandi prices
+
+
+Mills to find cotton supply
+
+
+Dealers to buy directly
+
+
+Corporates to source cotton bales
+
+
+Transparent pricing across markets
+
+
+
+22. Future Features (Recommended)
+AI Price Prediction
+Demand Forecasting
+Direct Farmer Auctions
+Quality Testing Integration
+Warehouse Tracking
+Logistics Matching
+Crop Advisory
+23. Plant Disease Detection System
+The platform will provide AI-powered crop disease detection to help farmers identify plant diseases early and take corrective action.
+Farmers can detect diseases through:
+Mobile App Plant Scanner
+
+
+WhatsApp Image Upload
+
+
+Both methods will use AI image analysis combined with location-based weather data to generate an accurate report.
+
+23.1 Feature Objectives
+The objective of this feature is to:
+Help farmers identify crop diseases early
+
+
+Provide recommended treatments
+
+
+Reduce crop losses
+
+
+Use weather data and humidity conditions to improve disease detection accuracy
+
+
+
+23.2 Disease Detection Methods
+1. Mobile App Plant Scanner
+Users can detect plant diseases directly inside the mobile application.
+Flow
+Step 1
+ User opens Plant Scanner feature in the app.
+Step 2
+ Camera opens and the farmer scans the plant.
+Step 3
+ AI analyzes the image.
+Step 4
+ The system identifies:
+Crop type
+
+
+Disease type
+
+
+Infection severity
+
+
+Step 5
+ The farmer receives a detailed report.
+
+Report Includes
+Disease Name
+Probability Score
+ Example:
+ Early Blight – 92% confidence
+Affected Area
+Severity Level
+Mild
+
+
+Moderate
+
+
+Severe
+
+
+Treatment Recommendations
+Example:
+Organic treatment
+
+
+Chemical treatment
+
+
+Preventive measures
+
+
+Nearby Agricultural Stores
+Recommended fertilizers / pesticides
+
+23.3 WhatsApp Disease Detection
+Farmers can also detect diseases using WhatsApp, which is useful for farmers who may not use the app regularly.
+
+Flow
+Step 1
+ Farmer sends a plant image to the platform's WhatsApp number.
+Step 2
+ WhatsApp chatbot responds with instructions.
+Example:
+"Please enable location sharing and send your plant photo."
+Step 3
+ User shares:
+Plant image
+
+
+Location
+
+
+Step 4
+ AI system processes the image.
+Step 5
+ User receives a detailed disease report via WhatsApp.
+
+23.4 Location Requirement
+To improve accuracy, location must be enabled.
+Location is used to gather environmental conditions such as:
+Temperature
+
+
+Humidity
+
+
+Rainfall
+
+
+Soil moisture
+
+
+Seasonal crop diseases common in that area
+
+
+This improves AI prediction accuracy.
+
+23.5 Weather Data Integration
+The system collects weather data from APIs based on the user's location.
+Weather parameters used:
+Temperature
+Humidity
+Rainfall
+Wind speed
+Moisture levels
+These parameters help determine:
+Disease likelihood
+
+
+Spread probability
+
+
+Suitable treatment
+
+
+
+23.6 Disease Intelligence Engine
+The AI system will combine:
+Image recognition
+
+
+Weather data
+
+
+Crop database
+
+
+Regional disease patterns
+
+
+To generate the final diagnosis.
+
+23.7 Disease Database
+The system will support disease detection for crops such as:
+Cotton
+Rice
+Tomato
+Chilli
+Maize
+Wheat
+Vegetables
+The disease library will include:
+Leaf diseases
+
+
+Fungal infections
+
+
+Pest infestations
+
+
+Nutrient deficiencies
+
+
+
+23.8 Example Report
+Example output to farmer:
+Crop
+ Cotton
+Detected Issue
+ Leaf Curl Disease
+Confidence
+ 91%
+Severity
+ Moderate
+Weather Conditions
+ High humidity detected in your region.
+Recommended Action
+Remove infected leaves
+
+
+Apply recommended pesticide
+
+
+Avoid over-irrigation
+
+
+Nearby Mandi Advisory
+ Check cotton prices in nearby markets before harvest.
+
+23.9 Notifications
+If a disease outbreak is detected in a region:
+The platform will send alerts to nearby farmers.
+Example:
+"Tomato Leaf Blight detected in Nalgonda region. Please monitor your crop."
+Notifications sent via:
+Mobile Push Notifications
+
+
+SMS
+
+
+WhatsApp
+
+
+
+23.10 Data Storage
+The system will store:
+Crop image
+Disease results
+Location data
+Weather conditions
+Treatment recommendations
+This data will be used for:
+Disease trend analysis
+
+
+AI model improvement
+
+
+Regional outbreak detection
+
+
+
+23.11 Benefits
+For Farmers
+Early disease detection
+
+
+Better crop yield
+
+
+Reduced pesticide misuse
+
+
+For Platform
+Agricultural intelligence data
+
+
+Regional disease insights
+
+
+AI training dataset
+
+
+
+23.12 Future Enhancements
+Voice-based disease reporting
+Video-based crop diagnosis
+Drone crop scanning integration
+Predictive disease alerts before outbreak
+Integration with agricultural universities for expert validation
+

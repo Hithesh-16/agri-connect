@@ -1,0 +1,35 @@
+const PRIMARY = "#1B6B3A";
+const ACCENT = "#F5A623";
+
+export default {
+  primary: PRIMARY,
+  primaryLight: "#2D8A50",
+  primaryDark: "#144F2C",
+  accent: ACCENT,
+  accentLight: "#FFC457",
+  green: "#22C55E",
+  red: "#EF4444",
+  orange: "#F97316",
+  blue: "#3B82F6",
+  background: "#F6F8F4",
+  card: "#FFFFFF",
+  border: "#E5EBE0",
+  text: "#1A2416",
+  textSecondary: "#5A6A54",
+  textLight: "#9AAF91",
+  placeholder: "#B5C4B0",
+  tabBar: "#FFFFFF",
+  tabBarActive: PRIMARY,
+  tabBarInactive: "#9AAF91",
+  headerBg: PRIMARY,
+  headerText: "#FFFFFF",
+  shadow: "rgba(27,107,58,0.12)",
+  overlay: "rgba(0,0,0,0.45)",
+  dark: {
+    background: "#0F1A12",
+    card: "#1A2A1D",
+    border: "#2A3D2E",
+    text: "#EAF2E6",
+    textSecondary: "#8FAB88",
+  },
+};

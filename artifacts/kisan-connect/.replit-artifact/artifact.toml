@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "KisanConnect - AgriMarket"
+version = "1.0.0"
+id = "artifacts/kisan-connect"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+localPort = 23576
+name = "expo"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/kisan-connect run dev"
+
+[services.env]
+PORT = "23576"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/kisan-connect", "run", "build"]
+run = ["pnpm", "--filter", "@workspace/kisan-connect", "run", "serve"]

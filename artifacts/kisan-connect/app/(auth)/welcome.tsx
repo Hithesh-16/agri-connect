@@ -74,7 +74,7 @@ export default function WelcomeScreen() {
       <FloatingTag label="Farmer" icon="sprout" color="#22C55E" style={[styles.float1, { top: topInset + 60 }]} />
       <FloatingTag label="Trader" icon="store" color="#60A5FA" style={[styles.float2, { top: topInset + 130 }]} />
       <FloatingTag label="Cotton" icon="flower" color="#F5A623" style={[styles.float3, { top: topInset + 90 }]} />
-      <FloatingTag label="Rice" icon="rice-bowl" color="#FCD34D" style={[styles.float4, { top: topInset + 170 }]} />
+      <FloatingTag label="Rice" icon="sack" color="#FCD34D" style={[styles.float4, { top: topInset + 170 }]} />
 
       <Animated.View
         style={[styles.content, { paddingTop: topInset + 40, paddingBottom: bottomInset + 24, opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
@@ -124,7 +124,7 @@ export default function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.secondaryBtn, { opacity: pressed ? 0.8 : 1 }]}
-            onPress={() => router.push("/(auth)/register")}
+            onPress={() => router.push("/(auth)/login")}
           >
             <Text style={styles.secondaryBtnText}>Already registered? Login</Text>
           </Pressable>

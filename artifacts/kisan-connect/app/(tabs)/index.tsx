@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { CROPS } from "@/data/crops";
 import { MOCK_PRICES, MOCK_WEATHER, NEWS_ITEMS } from "@/data/mockData";
 import { MANDIS } from "@/data/mandis";
+import { AppTour, shouldShowTour } from "@/components/AppTour";
 
 function WeatherIcon({ condition }: { condition: string }) {
   const icons: Record<string, { name: any; color: string }> = {
@@ -76,6 +77,11 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+
+  React.useEffect(() => {
+    shouldShowTour().then((should) => { if (should) setShowTour(true); });
+  }, []);
 
   const topInset = Platform.OS === "web" ? 67 : insets.top;
   const bottomInset = Platform.OS === "web" ? 34 : insets.bottom;
@@ -101,6 +107,8 @@ export default function HomeScreen() {
   }
 
   return (
+    <>
+    {showTour && <AppTour onDone={() => setShowTour(false)} />}
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: bottomInset + 90 }}
@@ -156,8 +164,8 @@ export default function HomeScreen() {
           {[
             { icon: "leaf", label: "My Crops", onPress: () => router.push("/(tabs)/prices") },
             { icon: "store-marker", label: "Mandis", onPress: () => router.push("/(tabs)/markets") },
-            { icon: "camera-scan", label: "Scan", onPress: () => router.push("/(tabs)/scanner") },
-            { icon: "shield-check", label: "eNAM", onPress: () => {} },
+            { icon: "crop-free", label: "Scan", onPress: () => router.push("/(tabs)/scanner") },
+            { icon: "shield-check", label: "eNAM", onPress: () => router.push("/(tabs)/supply-chain") },
           ].map((a) => (
             <Pressable key={a.label} style={styles.quickAction} onPress={a.onPress}>
               <View style={styles.quickActionIcon}>
@@ -209,6 +217,7 @@ export default function HomeScreen() {
         </View>
       </View>
     </ScrollView>
+    </>
   );
 }
 

@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   FlatList,
@@ -141,6 +142,20 @@ export default function MarketsScreen() {
         </View>
       </View>
 
+      {/* Supply Chain & eNAM Banner */}
+      <Pressable style={styles.supplyChainBanner} onPress={() => router.push("/(tabs)/supply-chain")}>
+        <View style={styles.supplyChainLeft}>
+          <View style={styles.supplyChainIcon}>
+            <MaterialCommunityIcons name="link-variant" size={20} color="#fff" />
+          </View>
+          <View>
+            <Text style={styles.supplyChainTitle}>Cotton Supply Chain · eNAM · Finance</Text>
+            <Text style={styles.supplyChainSub}>Price chain, trader registration & RXIL</Text>
+          </View>
+        </View>
+        <MaterialCommunityIcons name="arrow-right" size={18} color="rgba(255,255,255,0.8)" />
+      </Pressable>
+
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingBottom: 8 }}>
         {radiusOptions.map((r) => (
           <Pressable key={r.label} style={[styles.filterChip, radiusFilter === r.maxKm && styles.filterChipActive]} onPress={() => setRadiusFilter(r.maxKm)}>
@@ -216,7 +231,12 @@ const styles = StyleSheet.create({
   filterChipActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
   filterChipText: { fontFamily: "Inter_500Medium", fontSize: 12, color: Colors.textSecondary },
   filterChipTextActive: { color: "#fff" },
-  mapPlaceholder: { height: 150, backgroundColor: Colors.card, marginHorizontal: 16, borderRadius: 14, borderWidth: 1, borderColor: Colors.border, alignItems: "center", justifyContent: "center", marginBottom: 12, overflow: "hidden", position: "relative" },
+  supplyChainBanner: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: Colors.primary, marginHorizontal: 16, borderRadius: 12, padding: 12, marginBottom: 8 },
+  supplyChainLeft: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1 },
+  supplyChainIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center" },
+  supplyChainTitle: { fontFamily: "Inter_600SemiBold", fontSize: 13, color: "#fff" },
+  supplyChainSub: { fontFamily: "Inter_400Regular", fontSize: 11, color: "rgba(255,255,255,0.7)", marginTop: 1 },
+  mapPlaceholder: { height: 140, backgroundColor: Colors.card, marginHorizontal: 16, borderRadius: 14, borderWidth: 1, borderColor: Colors.border, alignItems: "center", justifyContent: "center", marginBottom: 12, overflow: "hidden", position: "relative" },
   mapPlaceholderText: { fontFamily: "Inter_400Regular", fontSize: 12, color: Colors.textSecondary, marginTop: 6 },
   mapPin: { position: "absolute" },
   mapPinLabel: { backgroundColor: Colors.card, borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2, borderWidth: 1, borderColor: Colors.border, marginTop: -4, marginLeft: -10, maxWidth: 60 },

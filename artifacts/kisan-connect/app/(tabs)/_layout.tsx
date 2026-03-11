@@ -104,6 +104,13 @@ function ClassicTabLayout() {
             isIOS ? <SymbolView name="person.fill" tintColor={color} size={22} /> : <Feather name="user" size={22} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="supply-chain"
+        options={{
+          title: "Supply Chain",
+          tabBarButton: () => null,
+        }}
+      />
     </Tabs>
   );
 }

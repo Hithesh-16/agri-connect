@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useEffect, useRef } from "react";
+import { useNavigation } from "@react-navigation/native";
+import LinearGradient from "react-native-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   Animated,
   Dimensions,
@@ -46,6 +46,7 @@ function FloatingTag({ label, icon, color, style }: { label: string; icon: any; 
 }
 
 export default function WelcomeScreen() {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -116,7 +117,7 @@ export default function WelcomeScreen() {
         <View style={styles.buttons}>
           <Pressable
             style={({ pressed }) => [styles.primaryBtn, { opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.98 : 1 }] }]}
-            onPress={() => router.push("/(auth)/register")}
+            onPress={() => navigation.navigate("Register")}
           >
             <Text style={styles.primaryBtnText}>Get Started</Text>
             <MaterialCommunityIcons name="arrow-right" size={20} color="#FFFFFF" />
@@ -124,7 +125,7 @@ export default function WelcomeScreen() {
 
           <Pressable
             style={({ pressed }) => [styles.secondaryBtn, { opacity: pressed ? 0.8 : 1 }]}
-            onPress={() => router.push("/(auth)/login")}
+            onPress={() => navigation.navigate("Login")}
           >
             <Text style={styles.secondaryBtnText}>Already registered? Login</Text>
           </Pressable>

@@ -1,8 +1,9 @@
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import LinearGradient from "react-native-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -21,6 +22,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const OTP_LENGTH = 6;
 
 export default function LoginScreen() {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { signIn } = useAuth();
   const [step, setStep] = useState<"mobile" | "otp">("mobile");
@@ -114,8 +116,7 @@ export default function LoginScreen() {
       lastActive: Date.now(),
     });
     setLoading(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace("/(tabs)");
+    ReactNativeHapticFeedback.trigger("notificationSuccess");
   }
 
   function handleResend() {
@@ -129,7 +130,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <LinearGradient colors={["#0D4A22", "#1B6B3A"]} style={[styles.header, { paddingTop: topInset + 16 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={10}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={10}>
           <MaterialIcons name="arrow-back" size={24} color="rgba(255,255,255,0.9)" />
         </Pressable>
         <View style={styles.logoRow}>
@@ -177,7 +178,7 @@ export default function LoginScreen() {
               <MaterialCommunityIcons name="arrow-right" size={20} color="#fff" />
             </Pressable>
 
-            <Pressable style={styles.registerLink} onPress={() => router.replace("/(auth)/register")}>
+            <Pressable style={styles.registerLink} onPress={() => navigation.replace("Register")}>
               <Text style={styles.registerLinkText}>New user? Create Account</Text>
             </Pressable>
           </Animated.View>

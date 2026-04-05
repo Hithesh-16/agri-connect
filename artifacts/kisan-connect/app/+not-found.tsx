@@ -1,18 +1,15 @@
-import { Link, Stack } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { StyleSheet, Text, View, Pressable } from "react-native";
 
 export default function NotFoundScreen() {
+  const navigation = useNavigation<any>();
   return (
-    <>
-      <Stack.Screen options={{ title: "Oops!" }} />
-      <View style={styles.container}>
-        <Text style={styles.title}>This screen doesn&apos;t exist.</Text>
-
-        <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>Go to home screen!</Text>
-        </Link>
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text style={styles.title}>This screen doesn&apos;t exist.</Text>
+      <Pressable onPress={() => navigation.getParent()?.goBack()} style={styles.link}>
+        <Text style={styles.linkText}>Go to home screen!</Text>
+      </Pressable>
+    </View>
   );
 }
 

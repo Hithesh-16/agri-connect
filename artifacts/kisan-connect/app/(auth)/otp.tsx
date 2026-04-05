@@ -1,7 +1,8 @@
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -19,8 +20,12 @@ import Colors from "@/constants/colors";
 const OTP_LENGTH = 6;
 
 export default function OTPScreen() {
+  const navigation = useNavigation<any>();
+  const { params } = useRoute<any>();
+  const mobile = params?.mobile ?? "";
+  const aadhaar = params?.aadhaar ?? "";
+  const role = params?.role ?? "";
   const insets = useSafeAreaInsets();
-  const { mobile, aadhaar, role } = useLocalSearchParams<{ mobile: string; aadhaar: string; role: string }>();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [timer, setTimer] = useState(30);
   const [canResend, setCanResend] = useState(false);
@@ -65,7 +70,7 @@ export default function OTPScreen() {
       Animated.timing(shakeAnim, { toValue: 10, duration: 60, useNativeDriver: true }),
       Animated.timing(shakeAnim, { toValue: 0, duration: 60, useNativeDriver: true }),
     ]).start();
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    ReactNativeHapticFeedback.trigger("notificationError");
   }
 
   async function handleVerify() {
@@ -78,8 +83,8 @@ export default function OTPScreen() {
     setVerifying(true);
     await new Promise((r) => setTimeout(r, 1000));
     setVerifying(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.push({ pathname: "/(auth)/personal-info", params: { mobile, aadhaar, role } });
+    ReactNativeHapticFeedback.trigger("notificationSuccess");
+    navigation.navigate("PersonalInfo", { mobile, aadhaar, role });
   }
 
   function handleResend() {
@@ -95,7 +100,7 @@ export default function OTPScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={10}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={10}>
           <MaterialIcons name="arrow-back" size={24} color={Colors.headerText} />
         </Pressable>
         <Text style={styles.headerTitle}>Verify OTP</Text>

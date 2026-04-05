@@ -1,7 +1,8 @@
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
   Platform,
   Pressable,
@@ -24,8 +25,9 @@ const RADIUS_FILTERS = [
 ];
 
 export default function MandiSelectionScreen() {
+  const navigation = useNavigation<any>();
+  const { params } = useRoute<any>();
   const insets = useSafeAreaInsets();
-  const params = useLocalSearchParams();
   const { signIn } = useAuth();
   const [selected, setSelected] = useState<string[]>([]);
   const [radiusFilter, setRadiusFilter] = useState(999);
@@ -37,7 +39,7 @@ export default function MandiSelectionScreen() {
   const filtered = MANDIS.filter((m) => m.distanceKm <= radiusFilter);
 
   function toggleMandi(id: string) {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger("impactLight");
     setSelected((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
@@ -63,13 +65,12 @@ export default function MandiSelectionScreen() {
       lastActive: Date.now(),
     });
     setSaving(false);
-    router.replace("/(tabs)");
   }
 
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={10}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={10}>
           <MaterialIcons name="arrow-back" size={24} color={Colors.headerText} />
         </Pressable>
         <Text style={styles.headerTitle}>Select Mandis</Text>

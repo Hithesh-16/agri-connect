@@ -9,15 +9,17 @@ dist/
 web-build/
 expo-env.d.ts
 
-# Native
+# Native (android/ kept for Android Studio; run `expo prebuild --platform ios` for ios/)
 ios/
-android/
+# android/ - uncommented so Android Studio project is in repo
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
 *.mobileprovision
+*.pnpm_store/
+.pnpm_store/
 
 # Metro
 .metro-health-check*

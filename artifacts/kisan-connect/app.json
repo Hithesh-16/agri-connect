@@ -1,4 +1,5 @@
 {
+  "name": "KisanConnect",
   "expo": {
     "name": "KisanConnect",
     "slug": "kisan-connect",
@@ -20,7 +21,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/icon.png",
         "backgroundColor": "#1B6B3A"
-      }
+      },
+      "package": "com.anonymous.kisanconnect"
     },
     "web": {
       "favicon": "./assets/images/icon.png"

@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useRef, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import LinearGradient from "react-native-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   Animated,
   Platform,
@@ -74,6 +74,7 @@ function NewsCard({ item }: { item: typeof NEWS_ITEMS[0] }) {
 }
 
 export default function HomeScreen() {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
@@ -162,10 +163,10 @@ export default function HomeScreen() {
       <View style={styles.body}>
         <View style={styles.quickActions}>
           {[
-            { icon: "leaf", label: "My Crops", onPress: () => router.push("/(tabs)/prices") },
-            { icon: "store-marker", label: "Mandis", onPress: () => router.push("/(tabs)/markets") },
-            { icon: "crop-free", label: "Scan", onPress: () => router.push("/(tabs)/scanner") },
-            { icon: "shield-check", label: "eNAM", onPress: () => router.push("/(tabs)/supply-chain") },
+            { icon: "leaf", label: "My Crops", onPress: () => navigation.navigate("Prices") },
+            { icon: "store-marker", label: "Mandis", onPress: () => navigation.navigate("Markets") },
+            { icon: "crop-free", label: "Scan", onPress: () => navigation.navigate("Scanner") },
+            { icon: "shield-check", label: "eNAM", onPress: () => navigation.getParent()?.navigate("SupplyChain") },
           ].map((a) => (
             <Pressable key={a.label} style={styles.quickAction} onPress={a.onPress}>
               <View style={styles.quickActionIcon}>
@@ -179,7 +180,7 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Today's Highlights</Text>
-            <Pressable onPress={() => router.push("/(tabs)/prices")}>
+            <Pressable onPress={() => navigation.navigate("Prices")}>
               <Text style={styles.seeAll}>View All</Text>
             </Pressable>
           </View>
@@ -191,12 +192,12 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Your Mandis</Text>
-            <Pressable onPress={() => router.push("/(tabs)/markets")}>
+            <Pressable onPress={() => navigation.navigate("Markets")}>
               <Text style={styles.seeAll}>See Map</Text>
             </Pressable>
           </View>
           {userMandis.slice(0, 3).map((m) => (
-            <Pressable key={m.id} style={styles.mandiRow} onPress={() => router.push("/(tabs)/markets")}>
+            <Pressable key={m.id} style={styles.mandiRow} onPress={() => navigation.navigate("Markets")}>
               <View style={styles.mandiRowIcon}>
                 <MaterialCommunityIcons name="store-marker-outline" size={20} color={Colors.primary} />
               </View>

@@ -1,6 +1,7 @@
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -24,6 +25,7 @@ const ROLES: { id: UserRole; label: string; icon: any; desc: string }[] = [
 ];
 
 export default function RegisterScreen() {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const [method, setMethod] = useState<"aadhaar" | "mobile">("mobile");
   const [aadhaar, setAadhaar] = useState("");
@@ -47,7 +49,7 @@ export default function RegisterScreen() {
 
   function handleContinue() {
     if (!validate()) return;
-    router.push({ pathname: "/(auth)/otp", params: { mobile: method === "mobile" ? mobile : "", aadhaar: method === "aadhaar" ? aadhaar.replace(/\s/g, "") : "", role } });
+    navigation.navigate("OTP", { mobile: method === "mobile" ? mobile : "", aadhaar: method === "aadhaar" ? aadhaar.replace(/\s/g, "") : "", role });
   }
 
   function formatAadhaar(text: string) {
@@ -60,7 +62,7 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={10}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={10}>
           <MaterialIcons name="arrow-back" size={24} color={Colors.headerText} />
         </Pressable>
         <Text style={styles.headerTitle}>Create Account</Text>

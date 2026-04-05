@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   Animated,
   Dimensions,
@@ -78,7 +78,7 @@ export function AppTour({ onDone }: AppTourProps) {
   }
 
   function next() {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    ReactNativeHapticFeedback.trigger("impactLight");
     if (step < STEPS.length - 1) {
       setStep((s) => s + 1);
     } else {

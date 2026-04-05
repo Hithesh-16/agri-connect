@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import LinearGradient from "react-native-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   Alert,
   Platform,
@@ -39,6 +39,7 @@ function SettingRow({ icon, label, value, onPress, danger }: { icon: string; lab
 }
 
 export default function ProfileScreen() {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
   const [activeSection, setActiveSection] = useState<"crops" | "mandis" | null>(null);
@@ -51,12 +52,12 @@ export default function ProfileScreen() {
 
   function handleSignOut() {
     if (Platform.OS === "web") {
-      signOut().then(() => router.replace("/(auth)/welcome"));
+      signOut().then(() => {});
       return;
     }
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Sign Out", style: "destructive", onPress: () => signOut().then(() => router.replace("/(auth)/welcome")) },
+      { text: "Sign Out", style: "destructive", onPress: () => signOut().then(() => {}) },
     ]);
   }
 
@@ -158,9 +159,9 @@ export default function ProfileScreen() {
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Market Activity</Text>
-        <SettingRow icon="chart-line" label="Price Watchlist" onPress={() => router.push("/(tabs)/prices")} />
-        <SettingRow icon="map-marker-multiple" label="Nearby Mandis" onPress={() => router.push("/(tabs)/markets")} />
-        <SettingRow icon="leaf-circle" label="Disease Scanner" onPress={() => router.push("/(tabs)/scanner")} />
+        <SettingRow icon="chart-line" label="Price Watchlist" onPress={() => navigation.navigate("Prices")} />
+        <SettingRow icon="map-marker-multiple" label="Nearby Mandis" onPress={() => navigation.navigate("Markets")} />
+        <SettingRow icon="leaf-circle" label="Disease Scanner" onPress={() => navigation.navigate("Scanner")} />
         <SettingRow icon="newspaper-variant" label="Market News" onPress={() => {}} />
       </View>
 

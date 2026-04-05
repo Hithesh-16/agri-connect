@@ -10,6 +10,9 @@ out-tsc
 
 # dependencies
 node_modules
+.pnpm-store/
+.pnpm-store/
+*.pnpm-store/
 
 # IDEs and editors
 /.idea
@@ -47,3 +50,15 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Next.js
+.next/
+
+# Backend
+backend/uploads/
+

@@ -1,8 +1,8 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import * as ImagePicker from "expo-image-picker";
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
+import { launchImageLibrary, launchCamera } from "react-native-image-picker";
+import ReactNativeHapticFeedback from "react-native-haptic-feedback";
+import LinearGradient from "react-native-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   ActivityIndicator,
   Image,
@@ -94,10 +94,8 @@ export default function ScannerScreen() {
   const bottomInset = Platform.OS === "web" ? 34 : insets.bottom;
 
   async function pickImage() {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") return;
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
-    if (!res.canceled && res.assets[0]) {
+    const res = await launchImageLibrary({ mediaType: "photo", quality: 0.8 });
+    if (!res.didCancel && res.assets?.[0]?.uri) {
       setImage(res.assets[0].uri);
       setResult(null);
       analyzeImage();
@@ -109,10 +107,8 @@ export default function ScannerScreen() {
       pickImage();
       return;
     }
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") return;
-    const res = await ImagePicker.launchCameraAsync({ quality: 0.8 });
-    if (!res.canceled && res.assets[0]) {
+    const res = await launchCamera({ quality: 0.8 });
+    if (!res.didCancel && res.assets?.[0]?.uri) {
       setImage(res.assets[0].uri);
       setResult(null);
       analyzeImage();
@@ -121,12 +117,12 @@ export default function ScannerScreen() {
 
   async function analyzeImage() {
     setScanning(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    ReactNativeHapticFeedback.trigger("impactMedium");
     await new Promise((r) => setTimeout(r, 3000));
     const r = MOCK_RESULTS[Math.floor(Math.random() * MOCK_RESULTS.length)];
     setResult(r);
     setScanning(false);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    ReactNativeHapticFeedback.trigger("notificationSuccess");
   }
 
   function reset() {

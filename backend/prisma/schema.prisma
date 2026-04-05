@@ -1,0 +1,378 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  TRADER
+  DEALER
+  CORPORATE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum CropCategory {
+  cereal
+  pulse
+  cash
+  spice
+  vegetable
+}
+
+enum NewsCategory {
+  market
+  policy
+  weather
+  advisory
+}
+
+model User {
+  id             String      @id @default(cuid())
+  mobile         String      @unique
+  aadhaar        String?
+  firstName      String?
+  surname        String?
+  role           Role?
+  houseNo        String?
+  street         String?
+  village        String?
+  post           String?
+  mandal         String?
+  district       String?
+  state          String?
+  country        String?     @default("India")
+  dob            DateTime?
+  gender         Gender?
+  language       String?     @default("en")
+  updatesConsent Boolean     @default(false)
+  profilePhoto   String?
+  lastActive     DateTime    @default(now())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  crops              UserCrop[]
+  mandis             UserMandi[]
+  priceAlerts        PriceAlert[]
+  calendarTasks      UserCalendarTask[]
+  listings           Listing[]
+  inquiriesSent      Inquiry[] @relation("inquiriesSent")
+  communityPosts     CommunityPost[]
+  communityComments  CommunityComment[]
+
+  @@map("users")
+}
+
+model Crop {
+  id       String       @id
+  name     String
+  category CropCategory
+  icon     String
+  color    String
+  unit     String
+
+  prices          Price[]
+  users           UserCrop[]
+  priceHistories  PriceHistory[]
+  priceAlerts     PriceAlert[]
+  calendars       CropCalendar[]
+  listings        Listing[]
+  communityPosts  CommunityPost[]
+
+  @@map("crops")
+}
+
+model Mandi {
+  id          String  @id
+  name        String
+  district    String
+  state       String
+  distanceKm  Float
+  latitude    Float
+  longitude   Float
+  activeCrops Int
+  volume      String
+
+  prices         Price[]
+  users          UserMandi[]
+  priceHistories PriceHistory[]
+  priceAlerts    PriceAlert[]
+  listings       Listing[]
+
+  @@map("mandis")
+}
+
+model Price {
+  id            String   @id @default(cuid())
+  cropId        String
+  mandiId       String
+  minPrice      Float
+  maxPrice      Float
+  modalPrice    Float
+  farmGatePrice Float
+  dealerPrice   Float
+  retailPrice   Float
+  dealerMargin  Float
+  change        Float
+  changePercent Float
+  volume        String
+  unit          String   @default("quintal")
+  updatedAt     DateTime @default(now())
+
+  crop          Crop     @relation(fields: [cropId], references: [id])
+  mandi         Mandi    @relation(fields: [mandiId], references: [id])
+
+  @@map("prices")
+}
+
+model News {
+  id        String       @id
+  title     String
+  summary   String
+  category  NewsCategory
+  date      String
+  readTime  String
+  createdAt DateTime     @default(now())
+
+  @@map("news")
+}
+
+model DiseaseResult {
+  id             String   @id @default(cuid())
+  cropName       String
+  diseaseName    String
+  confidence     Float
+  severity       String
+  affectedArea   Float
+  weatherNote    String?
+  treatments     Json
+  nearbyAdvisory String?
+  createdAt      DateTime @default(now())
+
+  @@map("disease_results")
+}
+
+model UserCrop {
+  userId String
+  cropId String
+
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  crop   Crop @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@id([userId, cropId])
+  @@map("user_crops")
+}
+
+model UserMandi {
+  userId  String
+  mandiId String
+
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mandi   Mandi @relation(fields: [mandiId], references: [id], onDelete: Cascade)
+
+  @@id([userId, mandiId])
+  @@map("user_mandis")
+}
+
+model OtpVerification {
+  id        String   @id @default(cuid())
+  mobile    String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([mobile, otp])
+  @@map("otp_verifications")
+}
+
+model PriceHistory {
+  id            String   @id @default(cuid())
+  cropId        String
+  mandiId       String
+  minPrice      Float
+  maxPrice      Float
+  modalPrice    Float
+  farmGatePrice Float
+  dealerPrice   Float
+  retailPrice   Float
+  change        Float    @default(0)
+  changePercent Float    @default(0)
+  volume        String   @default("")
+  source        String   @default("seed")
+  date          DateTime
+  createdAt     DateTime @default(now())
+
+  crop  Crop  @relation(fields: [cropId], references: [id])
+  mandi Mandi @relation(fields: [mandiId], references: [id])
+
+  @@unique([cropId, mandiId, date])
+  @@map("price_history")
+}
+
+model PriceAlert {
+  id          String    @id @default(cuid())
+  userId      String
+  cropId      String
+  mandiId     String?
+  targetPrice Float
+  direction   String    // "above" | "below"
+  priceType   String    @default("mandi") // "mandi" | "farmGate" | "dealer" | "retail"
+  isActive    Boolean   @default(true)
+  triggeredAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  crop  Crop   @relation(fields: [cropId], references: [id])
+  mandi Mandi? @relation(fields: [mandiId], references: [id])
+
+  @@map("price_alerts")
+}
+
+model CropCalendar {
+  id         String @id @default(cuid())
+  cropId     String
+  region     String // "telangana_kharif" | "telangana_rabi"
+  activities Json   // Array of { week: number, activity: string, description: string, inputs?: string }
+
+  crop Crop @relation(fields: [cropId], references: [id])
+
+  @@unique([cropId, region])
+  @@map("crop_calendars")
+}
+
+model UserCalendarTask {
+  id           String    @id @default(cuid())
+  userId       String
+  cropId       String
+  activity     String
+  description  String    @default("")
+  week         Int
+  scheduledFor DateTime
+  isCompleted  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_calendar_tasks")
+}
+
+model Listing {
+  id           String    @id @default(cuid())
+  userId       String
+  cropId       String
+  type         String    // "sell" | "buy"
+  quantity     Float
+  unit         String
+  pricePerUnit Float?
+  description  String?
+  mandiId      String?
+  location     String?
+  expiresAt    DateTime
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  category     String    @default("crop")  // "crop"|"machinery"|"resource"|"tool"|"seed"|"labor"|"irrigation"|"animal"|"postharvest"|"growth_regulator"
+  itemId       String?   // References InventoryItem.id (optional, for non-crop listings)
+  itemName     String?   // Free-text item name (for items not in inventory)
+  listingType  String    @default("sell")  // "sell"|"buy"|"rent"|"exchange"
+  images       String[]
+  phone        String?
+  condition    String?   // "new"|"used"|"half_used"
+  rentalBasis  String?   // "per_day"|"per_hour"|"per_acre"|null
+
+  user      User      @relation(fields: [userId], references: [id])
+  crop      Crop      @relation(fields: [cropId], references: [id])
+  mandi     Mandi?    @relation(fields: [mandiId], references: [id])
+  inquiries Inquiry[]
+
+  @@map("listings")
+}
+
+model Inquiry {
+  id         String   @id @default(cuid())
+  listingId  String
+  fromUserId String
+  message    String
+  phone      String?
+  createdAt  DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  fromUser User   @relation("inquiriesSent", fields: [fromUserId], references: [id])
+
+  @@map("inquiries")
+}
+
+model InventoryCategory {
+  id          String  @id
+  names       Json    // { "en": "Machinery", "te": "యంత్రాలు", "hi": "मशीनरी" }
+  icon        String
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  items InventoryItem[]
+
+  @@map("inventory_categories")
+}
+
+model InventoryItem {
+  id            String  @id
+  categoryId    String
+  names         Json    // { "en": "Tractor", "te": "ట్రాక్టర్", "hi": "ट्रैक्टर" }
+  descriptions  Json?   // { "en": "...", "te": "...", "hi": "..." }
+  defaultUnit   String  // "per_day", "per_kg", "per_liter", "per_bag", "per_acre", "per_hour", "piece"
+  unitLabels    Json    // { "en": "per day", "te": "రోజుకు", "hi": "प्रति दिन" }
+  transactionTypes String[] // ["sell", "buy", "rent", "exchange"]
+  tags          String[]    // ["organic", "chemical", "bt", "hybrid", etc.]
+  brand         String?
+  isActive      Boolean @default(true)
+  sortOrder     Int     @default(0)
+
+  category InventoryCategory @relation(fields: [categoryId], references: [id])
+
+  @@map("inventory_items")
+}
+
+model CommunityPost {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // "question" | "success_story" | "tip" | "pest_help"
+  title     String
+  content   String
+  images    String[]
+  cropId    String?
+  location  String?
+  tags      String[]
+  upvotes   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User              @relation(fields: [userId], references: [id])
+  crop     Crop?             @relation(fields: [cropId], references: [id])
+  comments CommunityComment[]
+
+  @@map("community_posts")
+}
+
+model CommunityComment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  images    String[]
+  isAnswer  Boolean  @default(false)
+  upvotes   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id])
+
+  @@map("community_comments")
+}

@@ -1,6 +1,7 @@
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -38,8 +39,12 @@ function FormInput({ label, value, onChangeText, placeholder, keyboardType, maxL
 }
 
 export default function PersonalInfoScreen() {
+  const navigation = useNavigation<any>();
+  const { params } = useRoute<any>();
+  const mobile = params?.mobile ?? "";
+  const aadhaar = params?.aadhaar ?? "";
+  const role = params?.role ?? "";
   const insets = useSafeAreaInsets();
-  const { mobile, aadhaar, role } = useLocalSearchParams<{ mobile: string; aadhaar: string; role: string }>();
   const { signIn } = useAuth();
 
   const [firstName, setFirstName] = useState("");
@@ -77,14 +82,14 @@ export default function PersonalInfoScreen() {
     if (!validate()) return;
     setSaving(true);
     await new Promise((r) => setTimeout(r, 600));
-    router.push({ pathname: "/(auth)/crop-selection", params: { mobile, aadhaar, role, firstName, surname, village, district, state: state, mandal, gender, language, consent: consent ? "1" : "0" } });
+    navigation.navigate("CropSelection", { mobile, aadhaar, role, firstName, surname, village, district, state: state, mandal, gender, language, consent: consent ? "1" : "0" });
     setSaving(false);
   }
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={[styles.header, { paddingTop: topInset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn} hitSlop={10}>
+        <Pressable onPress={() => navigation.goBack()} style={styles.backBtn} hitSlop={10}>
           <MaterialIcons name="arrow-back" size={24} color={Colors.headerText} />
         </Pressable>
         <Text style={styles.headerTitle}>Personal Information</Text>

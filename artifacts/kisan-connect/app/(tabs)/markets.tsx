@@ -1,7 +1,7 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router";
 import React, { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import LinearGradient from "react-native-linear-gradient";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   FlatList,
   Platform,
@@ -107,6 +107,7 @@ function MandiDetail({ mandi }: { mandi: Mandi }) {
 }
 
 export default function MarketsScreen() {
+  const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -143,7 +144,7 @@ export default function MarketsScreen() {
       </View>
 
       {/* Supply Chain & eNAM Banner */}
-      <Pressable style={styles.supplyChainBanner} onPress={() => router.push("/(tabs)/supply-chain")}>
+      <Pressable style={styles.supplyChainBanner} onPress={() => navigation.getParent()?.navigate("SupplyChain")}>
         <View style={styles.supplyChainLeft}>
           <View style={styles.supplyChainIcon}>
             <MaterialCommunityIcons name="link-variant" size={20} color="#fff" />

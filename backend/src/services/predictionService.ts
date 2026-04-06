@@ -1,4 +1,7 @@
+import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '../config';
+
+const n = (d: Decimal | number): number => typeof d === 'number' ? d : Number(d);
 
 export interface PredictionPoint {
   date: string;
@@ -69,7 +72,7 @@ export class PredictionService {
       orderBy: { updatedAt: 'desc' },
     });
 
-    const currentPrice = currentPriceRecord?.modalPrice ?? (history.length > 0 ? history[history.length - 1].modalPrice : 0);
+    const currentPrice = currentPriceRecord ? n(currentPriceRecord.modalPrice) : (history.length > 0 ? n(history[history.length - 1].modalPrice) : 0);
 
     // If insufficient data, return flat prediction
     if (history.length < 7) {
@@ -77,7 +80,7 @@ export class PredictionService {
     }
 
     // Extract modal prices sorted by date
-    const prices = history.map(h => h.modalPrice);
+    const prices = history.map(h => n(h.modalPrice));
     const dates = history.map(h => h.date);
 
     // 1. Weighted Moving Average
@@ -256,7 +259,7 @@ export class PredictionService {
 
       if (lastYearData.length < 3) return 1.0; // No seasonal data available
 
-      const lastYearAvg = lastYearData.reduce((s, d) => s + d.modalPrice, 0) / lastYearData.length;
+      const lastYearAvg = lastYearData.reduce((s, d) => s + n(d.modalPrice), 0) / lastYearData.length;
 
       // Get current month's data
       const thisMonthStart = new Date(now);
@@ -272,7 +275,7 @@ export class PredictionService {
 
       if (currentData.length < 3 || lastYearAvg === 0) return 1.0;
 
-      const currentAvg = currentData.reduce((s, d) => s + d.modalPrice, 0) / currentData.length;
+      const currentAvg = currentData.reduce((s, d) => s + n(d.modalPrice), 0) / currentData.length;
 
       // Seasonal factor dampened to prevent extreme adjustments
       const rawFactor = currentAvg / lastYearAvg;

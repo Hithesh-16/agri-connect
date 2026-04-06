@@ -3,7 +3,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { config, prisma } from './config';
+import { logger } from './config/logger';
+import { initSentry, Sentry } from './config/sentry';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { requestLogger } from './middleware/requestLogger';
+import { startWorkers } from './workers';
 
 // Route imports
 import authRoutes from './routes/auth';
@@ -22,8 +26,12 @@ import listingRoutes from './routes/listings';
 import schemeRoutes from './routes/schemes';
 import inventoryRoutes from './routes/inventory';
 import communityRoutes from './routes/community';
+import roleRoutes from './routes/roles';
 
 const app = express();
+
+// Initialize Sentry (must be before routes)
+initSentry();
 
 // Security middleware
 app.use(helmet());
@@ -55,14 +63,43 @@ const authLimiter = rateLimit({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Health check
-app.get('/api/health', (_req, res) => {
-  res.json({
-    success: true,
+// Request logging
+app.use(requestLogger);
+
+// Health check (detailed: DB + Redis status)
+app.get('/api/health', async (_req, res) => {
+  let dbStatus = 'disconnected';
+  let redisStatus = 'not configured';
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    dbStatus = 'connected';
+  } catch {
+    dbStatus = 'error';
+  }
+
+  try {
+    const { getRedis } = await import('./config/redis');
+    const redis = getRedis();
+    if (redis) {
+      await redis.ping();
+      redisStatus = 'connected';
+    }
+  } catch {
+    redisStatus = 'error';
+  }
+
+  const healthy = dbStatus === 'connected';
+  res.status(healthy ? 200 : 503).json({
+    success: healthy,
     data: {
-      status: 'ok',
+      status: healthy ? 'ok' : 'degraded',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
+      version: '1.0.0',
+      services: {
+        database: dbStatus,
+        redis: redisStatus,
+      },
     },
   });
 });
@@ -84,6 +121,10 @@ app.use('/api/listings', listingRoutes);
 app.use('/api/schemes', schemeRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/rbac', roleRoutes);
+
+// Sentry error handler (must be before custom error handler)
+Sentry.setupExpressErrorHandler(app);
 
 // Error handling
 app.use(notFoundHandler);
@@ -93,27 +134,38 @@ app.use(errorHandler);
 async function main() {
   try {
     await prisma.$connect();
-    console.log('Database connected successfully.');
+    logger.info('Database connected');
+
+    // Start background workers (notifications, audit logging)
+    startWorkers();
 
     app.listen(config.port, () => {
-      console.log(`Kisan Connect API running on http://localhost:${config.port}`);
-      console.log(`Environment: ${config.nodeEnv}`);
+      logger.info({ port: config.port, env: config.nodeEnv }, 'KisanConnect API started');
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.fatal({ err: error }, 'Failed to start server');
     process.exit(1);
   }
 }
 
 // Graceful shutdown
-process.on('SIGINT', async () => {
+async function shutdown(signal: string) {
+  logger.info({ signal }, 'Shutting down gracefully');
   await prisma.$disconnect();
   process.exit(0);
-});
+}
 
-process.on('SIGTERM', async () => {
-  await prisma.$disconnect();
-  process.exit(0);
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught exception');
+  Sentry.captureException(err);
+  process.exit(1);
+});
+process.on('unhandledRejection', (reason) => {
+  logger.fatal({ err: reason }, 'Unhandled rejection');
+  Sentry.captureException(reason);
+  process.exit(1);
 });
 
 main();

@@ -60,14 +60,17 @@ router.post('/verify-otp', validate(verifyOtpSchema), async (req, res: Response)
     }
 
     const user = await AuthService.findOrCreateUser(mobile);
-    const token = AuthService.generateToken({ userId: user.id, mobile: user.mobile });
+    const deviceInfo = req.get('user-agent');
+    const ipAddress = req.ip;
+    const tokens = await AuthService.generateTokenPair(user.id, user.mobile, deviceInfo, ipAddress);
 
     const isRegistered = !!(user.firstName && user.role);
 
     res.json({
       success: true,
       data: {
-        token,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
         user: {
           id: user.id,
           mobile: user.mobile,
@@ -114,11 +117,51 @@ router.post('/register', authenticate, validate(registerSchema), async (req: Aut
   }
 });
 
-// POST /api/auth/logout
-router.post('/logout', authenticate, async (_req: AuthRequest, res: Response) => {
-  // In a stateless JWT setup, the client simply discards the token.
-  // For a more robust implementation, add token to a blacklist (Redis).
-  res.json({ success: true, message: 'Logged out successfully.' });
+// POST /api/auth/refresh — rotate refresh token, get new access token
+const refreshSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh token required'),
+});
+
+router.post('/refresh', validate(refreshSchema), async (req, res: Response) => {
+  try {
+    const { refreshToken } = req.body;
+    const deviceInfo = req.get('user-agent');
+    const ipAddress = req.ip;
+
+    const result = await AuthService.rotateRefreshToken(refreshToken, deviceInfo, ipAddress);
+
+    if (!result) {
+      res.status(401).json({ success: false, error: 'Invalid or expired refresh token. Please log in again.' });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Token refresh failed.' });
+  }
+});
+
+// POST /api/auth/logout — revoke refresh token
+router.post('/logout', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { refreshToken } = req.body || {};
+    if (refreshToken) {
+      await AuthService.revokeRefreshToken(refreshToken);
+    }
+    // Also revoke all tokens if requested
+    if (req.body?.allDevices) {
+      await AuthService.revokeAllUserTokens(req.user!.userId);
+    }
+    res.json({ success: true, message: 'Logged out successfully.' });
+  } catch (err) {
+    res.json({ success: true, message: 'Logged out successfully.' });
+  }
 });
 
 export default router;

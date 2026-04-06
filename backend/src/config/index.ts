@@ -10,7 +10,8 @@ if (!isDev && !process.env.JWT_SECRET) {
 export const config = {
   port: parseInt(process.env.PORT || '5000', 10),
   jwtSecret: process.env.JWT_SECRET || (isDev ? 'dev-only-secret-not-for-production' : ''),
-  jwtExpiresIn: '20d',
+  jwtExpiresIn: '15m',
+  refreshTokenExpiresInDays: 30,
   otpExpiryMinutes: 5,
   // Universal OTP only works in development mode
   universalOtp: isDev ? '123456' : null,
@@ -26,4 +27,5 @@ export const config = {
 
 export const prisma = new PrismaClient({
   log: isDev ? ['warn', 'error'] : ['error'],
+  datasourceUrl: process.env.DATABASE_URL,
 });

@@ -1,4 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
+import { createChildLogger } from '../config/logger';
+import { Sentry } from '../config/sentry';
+
+const log = createChildLogger('error');
 
 export class AppError extends Error {
   statusCode: number;
@@ -10,8 +14,9 @@ export class AppError extends Error {
   }
 }
 
-export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): void {
+export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction): void {
   if (err instanceof AppError) {
+    log.warn({ statusCode: err.statusCode, url: req.originalUrl, method: req.method }, err.message);
     res.status(err.statusCode).json({
       success: false,
       error: err.message,
@@ -19,7 +24,8 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
     return;
   }
 
-  console.error('Unhandled error:', err);
+  log.error({ err, url: req.originalUrl, method: req.method }, 'Unhandled error');
+  Sentry.captureException(err);
 
   res.status(500).json({
     success: false,

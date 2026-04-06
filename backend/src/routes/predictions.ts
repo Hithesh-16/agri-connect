@@ -7,8 +7,9 @@ const router = Router();
 router.get('/:cropId', async (req: Request, res: Response) => {
   try {
     const { cropId } = req.params;
-    const mandiId = req.query.mandiId as string | undefined;
-    const daysParam = parseInt(req.query.days as string, 10);
+    const mandiIdRaw = req.query.mandiId;
+    const mandiId: string | undefined = typeof mandiIdRaw === 'string' ? mandiIdRaw : undefined;
+    const daysParam = parseInt(String(req.query.days || '7'), 10);
 
     // Validate days parameter
     let days = 7;
@@ -16,7 +17,7 @@ router.get('/:cropId', async (req: Request, res: Response) => {
       days = daysParam;
     }
 
-    const result = await PredictionService.predict(cropId, mandiId, days);
+    const result = await PredictionService.predict(String(cropId), mandiId, days);
 
     res.json({ success: true, data: result });
   } catch (err: any) {

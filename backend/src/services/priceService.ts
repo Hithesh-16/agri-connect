@@ -1,4 +1,8 @@
+import { Decimal } from '@prisma/client/runtime/library';
 import { prisma } from '../config';
+
+// Convert Prisma Decimal to number for arithmetic
+const n = (d: Decimal | number): number => typeof d === 'number' ? d : Number(d);
 
 export class PriceService {
   static async getAllPrices(filters: {
@@ -53,17 +57,17 @@ export class PriceService {
         let displayPrice: number;
         switch (filters.type) {
           case 'farmGate':
-            displayPrice = p.farmGatePrice;
+            displayPrice = n(p.farmGatePrice);
             break;
           case 'dealer':
-            displayPrice = p.dealerPrice;
+            displayPrice = n(p.dealerPrice);
             break;
           case 'retail':
-            displayPrice = p.retailPrice;
+            displayPrice = n(p.retailPrice);
             break;
           case 'mandi':
           default:
-            displayPrice = p.modalPrice;
+            displayPrice = n(p.modalPrice);
             break;
         }
         return { ...p, displayPrice, priceType: filters.type };
@@ -83,10 +87,10 @@ export class PriceService {
     if (prices.length === 0) return null;
 
     // Aggregate across all mandis for the crop
-    const avgFarmGate = prices.reduce((sum, p) => sum + p.farmGatePrice, 0) / prices.length;
-    const avgDealer = prices.reduce((sum, p) => sum + p.dealerPrice, 0) / prices.length;
-    const avgMandi = prices.reduce((sum, p) => sum + p.modalPrice, 0) / prices.length;
-    const avgRetail = prices.reduce((sum, p) => sum + p.retailPrice, 0) / prices.length;
+    const avgFarmGate = prices.reduce((sum, p) => sum + n(p.farmGatePrice), 0) / prices.length;
+    const avgDealer = prices.reduce((sum, p) => sum + n(p.dealerPrice), 0) / prices.length;
+    const avgMandi = prices.reduce((sum, p) => sum + n(p.modalPrice), 0) / prices.length;
+    const avgRetail = prices.reduce((sum, p) => sum + n(p.retailPrice), 0) / prices.length;
 
     return {
       crop: prices[0].crop,
@@ -125,26 +129,26 @@ export class PriceService {
     });
 
     const gainers = prices
-      .filter((p) => p.changePercent > 0)
+      .filter((p) => n(p.changePercent) > 0)
       .slice(0, 5)
       .map((p) => ({
         crop: p.crop.name,
         mandi: p.mandi.name,
-        price: p.modalPrice,
-        change: p.change,
-        changePercent: p.changePercent,
+        price: n(p.modalPrice),
+        change: n(p.change),
+        changePercent: n(p.changePercent),
       }));
 
     const losers = prices
-      .filter((p) => p.changePercent < 0)
-      .sort((a, b) => a.changePercent - b.changePercent)
+      .filter((p) => n(p.changePercent) < 0)
+      .sort((a, b) => n(a.changePercent) - n(b.changePercent))
       .slice(0, 5)
       .map((p) => ({
         crop: p.crop.name,
         mandi: p.mandi.name,
-        price: p.modalPrice,
-        change: p.change,
-        changePercent: p.changePercent,
+        price: n(p.modalPrice),
+        change: n(p.change),
+        changePercent: n(p.changePercent),
       }));
 
     return { gainers, losers };

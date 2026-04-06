@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4-alpine
+    environment:
+      POSTGRES_USER: kisanconnect
+      POSTGRES_PASSWORD: kisanconnect
+      POSTGRES_DB: kisanconnect
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - '5000:5000'
+    environment:
+      DATABASE_URL: postgresql://kisanconnect:kisanconnect@postgres:5432/kisanconnect
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-docker-secret
+      NODE_ENV: development
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+  pgdata:

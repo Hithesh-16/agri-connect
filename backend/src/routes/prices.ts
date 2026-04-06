@@ -3,6 +3,7 @@ import { PriceService } from '../services/priceService';
 import { authenticate } from '../middleware/auth';
 import { AuthRequest } from '../types';
 import { paginate, paginatedResponse } from '../types';
+import { cacheGet, cacheSet, CACHE_TTL } from '../config/redis';
 
 const router = Router();
 
@@ -45,7 +46,15 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 // GET /api/prices/highlights
 router.get('/highlights', async (_req, res: Response) => {
   try {
+    const cacheKey = 'prices:highlights';
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      res.json({ success: true, data: cached });
+      return;
+    }
+
     const highlights = await PriceService.getHighlights();
+    await cacheSet(cacheKey, highlights, CACHE_TTL.PRICES);
     res.json({ success: true, data: highlights });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to fetch highlights.' });

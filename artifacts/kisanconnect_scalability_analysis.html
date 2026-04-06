@@ -1,0 +1,388 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1.5rem 0}
+h1{font-size:22px;font-weight:500;color:var(--color-text-primary);margin-bottom:.4rem}
+.sub{font-size:14px;color:var(--color-text-secondary);margin-bottom:2rem}
+.tabs{display:flex;gap:6px;margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{padding:6px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:13px;font-weight:500;cursor:pointer;color:var(--color-text-secondary);transition:all .15s}
+.tab.active{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.panel{display:none}.panel.active{display:block}
+.section-title{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:1rem;margin-top:1.5rem}
+.section-title:first-child{margin-top:0}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:.75rem}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:.75rem;margin-bottom:1rem}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:4px;margin-left:8px}
+.badge-red{background:var(--color-background-danger);color:var(--color-text-danger)}
+.badge-amber{background:var(--color-background-warning);color:var(--color-text-warning)}
+.badge-green{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-blue{background:var(--color-background-info);color:var(--color-text-info)}
+.issue-row{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);align-items:flex-start}
+.issue-row:last-child{border-bottom:none}
+.issue-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dot-red{background:var(--color-text-danger)}
+.dot-amber{background:var(--color-text-warning)}
+.dot-green{background:var(--color-text-success)}
+.dot-blue{background:var(--color-text-info)}
+.issue-label{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px}
+.issue-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.issue-fix{font-size:12px;color:var(--color-text-success);margin-top:4px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
+.metric-val{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric-lbl{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.stack-row{display:grid;grid-template-columns:140px 1fr 1fr 60px;gap:8px;align-items:center;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+.stack-row:last-child{border-bottom:none}
+.stack-head{font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary);display:grid;grid-template-columns:140px 1fr 1fr 60px;gap:8px}
+.stack-keep{color:var(--color-text-success);font-size:12px}
+.stack-replace{color:var(--color-text-danger);font-size:12px}
+.stack-add{color:var(--color-text-info);font-size:12px}
+.score-bar{height:6px;border-radius:3px;background:var(--color-border-tertiary);margin-top:6px}
+.score-fill{height:100%;border-radius:3px;transition:width .4s}
+.phase-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;margin-bottom:.75rem}
+.phase-header{padding:12px 16px;display:flex;align-items:center;gap:12px;background:var(--color-background-secondary)}
+.phase-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.phase-body{padding:12px 16px}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:11px;padding:3px 8px;border-radius:4px;background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)}
+.pill{font-size:11px;padding:3px 10px;border-radius:100px}
+.pill-blue{background:var(--color-background-info);color:var(--color-text-info)}
+.pill-red{background:var(--color-background-danger);color:var(--color-text-danger)}
+.pill-amber{background:var(--color-background-warning);color:var(--color-text-warning)}
+.pill-green{background:var(--color-background-success);color:var(--color-text-success)}
+.arch-layer{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:8px}
+.arch-layer-title{font-size:12px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.arch-items{display:flex;flex-wrap:wrap;gap:5px}
+.arch-item{font-size:12px;padding:3px 8px;border-radius:4px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);color:var(--color-text-primary)}
+.arch-item.new{background:var(--color-background-info);color:var(--color-text-info);border-color:transparent}
+.arch-item.keep{background:var(--color-background-success);color:var(--color-text-success);border-color:transparent}
+.arch-item.upgrade{background:var(--color-background-warning);color:var(--color-text-warning);border-color:transparent}
+.separator{height:0.5px;background:var(--color-border-tertiary);margin:1.5rem 0}
+</style>
+<div class="wrap">
+<h1>KisanConnect — Cross-Check & Scalability Analysis</h1>
+<p class="sub">Full audit: 23 inconsistencies found · Stack rated across 9 dimensions · Updated architecture proposed</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPanel('audit')">Document Audit</div>
+  <div class="tab" onclick="showPanel('stack')">Stack Analysis</div>
+  <div class="tab" onclick="showPanel('arch')">Updated Architecture</div>
+  <div class="tab" onclick="showPanel('plan')">Revised Roadmap</div>
+  <div class="tab" onclick="showPanel('priority')">Priority Fixes</div>
+</div>
+
+<!-- AUDIT PANEL -->
+<div id="p-audit" class="panel active">
+  <div class="metric-grid">
+    <div class="metric"><div class="metric-val" style="color:var(--color-text-danger)">9</div><div class="metric-lbl">Critical gaps</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--color-text-warning)">8</div><div class="metric-lbl">Inconsistencies</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--color-text-info)">6</div><div class="metric-lbl">Missing systems</div></div>
+    <div class="metric"><div class="metric-val" style="color:var(--color-text-success)">60%</div><div class="metric-lbl">Overall completion</div></div>
+  </div>
+
+  <p class="section-title">Critical gaps (blockers to production)</p>
+  <div class="card">
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No payment gateway implemented <span class="badge badge-red">Blocker</span></div><div class="issue-desc">Razorpay listed in architecture plans and Phase 3 roadmap but has 0% implementation. Without this, the entire marketplace monetisation is non-functional. Escrow, UPI, and payout flows are all missing.</div><div class="issue-fix">→ Implement Razorpay before any vendor goes live. Route API for escrow is non-trivial — needs dedicated 2-week sprint.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">Mobile app not wired to backend <span class="badge badge-red">Blocker</span></div><div class="issue-desc">React Native 0.81 app exists but is not connected to the 17 backend routes. TanStack Query is listed in the stack but no API calls are implemented. Vision Camera is listed but no ML inference pipeline exists.</div><div class="issue-fix">→ Wire API calls before adding any new mobile features. Prioritise auth → prices → booking → notifications.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No real-time update mechanism <span class="badge badge-red">Critical</span></div><div class="issue-desc">Booking status changes (CONFIRMED → IN_PROGRESS → COMPLETED) require the farmer and vendor to see updates live. No WebSocket or SSE layer exists. Polling would destroy performance at scale.</div><div class="issue-fix">→ Add Socket.io or Ably for booking room events. SSE is simpler for one-way notifications.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No async job queue <span class="badge badge-red">Critical</span></div><div class="issue-desc">SMS, WhatsApp, and push notifications are fire-and-forget in the current design. During peak harvest bookings (100s/minute), synchronous notification calls will block API responses and cause timeouts. Price ingestion from AGMARKNET also needs a queue.</div><div class="issue-fix">→ Add BullMQ + Redis. Notification workers dequeue asynchronously. Prevents API latency spikes.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No caching layer <span class="badge badge-red">Critical</span></div><div class="issue-desc">Mandi prices are fetched from AGMARKNET and weather from IMD/OpenWeather on every request. These rarely change within minutes. Under load, this will hit external API rate limits and add 200–800ms latency to every dashboard load.</div><div class="issue-fix">→ Redis cache for prices (TTL 15 min), weather (TTL 30 min), scheme data (TTL 24h). Cache-aside pattern.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">PostgreSQL on Neon — connection limit problem <span class="badge badge-red">Critical</span></div><div class="issue-desc">Neon's serverless PostgreSQL has connection limits (20–100 depending on plan). Express.js with Prisma holds persistent connections. At 50 concurrent users, you will hit connection exhaustion and get "too many connections" errors.</div><div class="issue-fix">→ Add PgBouncer or use Neon's built-in connection pooling mode. Set Prisma connection_limit=5 per instance, pool externally.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No geo-search infrastructure <span class="badge badge-red">Critical</span></div><div class="issue-desc">The vendor discovery feature ("services near me within 5/10/25 km") is the core UX of the marketplace. The current PostgreSQL schema has no PostGIS extension, no spatial index, and no geospatial query. This is the #1 query in the whole app.</div><div class="issue-fix">→ Enable PostGIS on Neon. Add GEOGRAPHY columns to ServiceProvider. Create GiST index. Use ST_DWithin() for radius queries.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No offline-first implementation on mobile <span class="badge badge-red">Critical</span></div><div class="issue-desc">WatermelonDB is listed in the architecture section but NOT in the current mobile stack. The document acknowledges rural users have intermittent 2G, but the app currently requires network for every interaction.</div><div class="issue-fix">→ Add WatermelonDB to the mobile stack now. Cache prices, vendor listings, and booking data. Sync queue on reconnect.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-red"></div><div><div class="issue-label">No observability / monitoring <span class="badge badge-red">Critical</span></div><div class="issue-desc">No error tracking, no APM, no structured logging. When the service goes down at 6AM during harvest season, there's no alert, no trace, no log to debug. This is unacceptable for a production system.</div><div class="issue-fix">→ Add Sentry (errors), Pino (structured logs), and uptime monitoring (BetterStack or UptimeRobot). Free tiers sufficient to start.</div></div></div>
+  </div>
+
+  <p class="section-title">Document inconsistencies</p>
+  <div class="card">
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">OpenWeatherMap vs IMD — conflicting sources</div><div class="issue-desc">Section 04 (current stack) lists OpenWeatherMap as an active service. Section 09 (architecture) and Section 08 (edge cases) list IMD as the target. IMD requires a formal licence agreement — it's not a simple API key signup. No migration path is documented.</div><div class="issue-fix">→ Keep OpenWeatherMap for MVP. Plan IMD licensing in Phase 5. Document both clearly.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">Decimal fields missing precision in Prisma models</div><div class="issue-desc">All financial fields (totalAmount, platformFee, pricePerUnit, dailyRate) use Decimal type without specifying precision/scale. Prisma defaults to (65, 30) which is fine for storage but PostgreSQL aggregations on unbounded Decimal are slower than Decimal(10,2) or Decimal(15,4).</div><div class="issue-fix">→ Specify @db.Decimal(15, 4) for currency fields, @db.Decimal(10, 2) for user-facing prices.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">Mapbox GL listed as "plan" but Sentinel Hub also "plan" with no timeline</div><div class="issue-desc">Both Mapbox GL (geo visualisation) and Sentinel Hub (satellite NDVI) appear in the current tech stack as planned. Sentinel Hub has a minimum plan cost of ~$25/month and requires crop-polygon data which doesn't exist yet. It's a Phase 7 feature but listed as current.</div><div class="issue-fix">→ Move both to Phase 7. Use free Mapbox free tier for initial map features. Remove from "current stack" table.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">TimescaleDB listed in architecture but no migration strategy</div><div class="issue-desc">Price history data is currently in main PostgreSQL. The architecture plan lists TimescaleDB as a separate data store. Moving time-series data mid-production to a separate instance is a significant migration with dual-write complexity.</div><div class="issue-fix">→ Start with TimescaleDB extension on the same PostgreSQL instance. Only separate to a standalone instance after 6 months of data accumulation.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">Revenue projection assumes 10K bookings in Year 1 at INR 50L — math gap</div><div class="issue-desc">10,000 bookings × avg INR 1,000 booking value × 5% effective commission (blended) = INR 5L, not INR 50L. To reach INR 50L from commissions alone needs either 100K bookings or 15% commission on INR 3,333 avg booking value.</div><div class="issue-fix">→ Revise to include vendor subscription revenue + wallet fees. Year 1: 500 Pro vendors × INR 3,588/yr = INR 18L + 10K bookings × INR 150 avg commission = INR 15L = INR 33L. Still below 50L — revise down to INR 25L or revise assumptions up.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">KYC flow mentions DigiLocker and UIDAI API but no implementation path</div><div class="issue-desc">Aadhaar-based eKYC requires an AUA (Authentication User Agency) or KUA licence from UIDAI, which takes 3–6 months to obtain. DigiLocker API also needs formal agreement. The roadmap puts KYC in Phase 1 (Weeks 1-4) — this is unrealistic.</div><div class="issue-fix">→ Phase 1: manual KYC (upload Aadhaar photo + selfie, human review). Phase 3: integrate KARZA or IDfy (licensed eKYC providers with API access). Phase 6+: direct UIDAI integration after licence.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">Bhashini API described as "free" but requires ULCA registration</div><div class="issue-desc">Bhashini (ULCA) is government-backed but requires developer registration and API key. The ASR quality for agricultural terms (crop names, pesticide names in regional languages) is currently poor. A production voice system needs fallback to a commercial ASR provider.</div><div class="issue-fix">→ Register on ULCA now (free). For production, use Bhashini for translation/TTS, but Sarvam AI ASR or Google Cloud Speech for actual voice input until Bhashini ASR matures.</div></div></div>
+    <div class="issue-row"><div class="issue-dot dot-amber"></div><div><div class="issue-label">Section 12 monetisation mentions TDS handling (Section 194-O) but no implementation detail</div><div class="issue-desc">Under Section 194-O, platforms deduct 1% TDS on payouts to vendors above INR 5L/year. This requires PAN collection, TDS computation, Form 26Q quarterly filing, and TDS certificate issuance. Not mentioned in the data model or roadmap.</div><div class="issue-fix">→ Add TaxProfile model (PAN, GST, TDS threshold tracking). Integrate Razorpay's tax compliance tools. Add to Phase 3 scope.</div></div></div>
+  </div>
+
+  <p class="section-title">Missing systems (not mentioned, but required)</p>
+  <div class="card-grid">
+    <div class="card"><div class="issue-label" style="font-size:14px;margin-bottom:6px">OTA Updates for Mobile</div><div class="issue-desc">With React Native + rural users on Play Store slow-update behaviour, bug fixes can't wait for a 3-day review cycle during harvest season. Need Expo EAS Updates or Microsoft CodePush for instant OTA deploys.</div></div>
+    <div class="card"><div class="issue-label" style="font-size:14px;margin-bottom:6px">Image CDN + Compression</div><div class="issue-desc">Vendor profiles and service listings will have photos. S3 raw upload without a CDN means 3–8MB images loading over 2G. Need Cloudflare R2 + Images (or AWS S3 + CloudFront) with WebP conversion and responsive sizing.</div></div>
+    <div class="card"><div class="issue-label" style="font-size:14px;margin-bottom:6px">Fraud Detection</div><div class="issue-desc">Fake reviews, fake check-ins (GPS spoofing for attendance), duplicate vendor accounts — all mentioned as risks but no technical solution listed. Need IP velocity checks, device fingerprinting, GPS polygon validation.</div></div>
+    <div class="card"><div class="issue-label" style="font-size:14px;margin-bottom:6px">Refresh Token Rotation</div><div class="issue-desc">Current auth is JWT only. JWTs expire but there's no refresh token rotation. A stolen JWT is valid until expiry with no revocation. Need short-lived access tokens (15 min) + long-lived refresh tokens stored in database.</div></div>
+    <div class="card"><div class="issue-label" style="font-size:14px;margin-bottom:6px">Admin Panel (only 30% done)</div><div class="issue-desc">KYC review, dispute resolution, vendor ban, price management, booking interventions — all need an admin interface. At 30% this is not usable. Dispute resolution (Phase 5) can't launch without admin tools.</div></div>
+    <div class="card"><div class="issue-label" style="font-size:14px;margin-bottom:6px">CI/CD Pipeline</div><div class="issue-desc">No deployment automation mentioned. Manual deploys at 3AM when the booking service crashes are not viable. Need GitHub Actions → automated testing → staging → production with rollback.</div></div>
+  </div>
+</div>
+
+<!-- STACK ANALYSIS PANEL -->
+<div id="p-stack" class="panel">
+  <p class="section-title">Current stack scored (1–10 for scalability at 100K users)</p>
+  <div class="card">
+    <div id="scores"></div>
+  </div>
+
+  <p class="section-title">Component-by-component verdict</p>
+  <div class="card">
+    <div class="stack-head"><div>Layer</div><div>Current</div><div>Recommended</div><div>Action</div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Web frontend</div><div>Next.js 14 + Tailwind + TanStack Query 5</div><div style="color:var(--color-text-success)">Keep as-is. Upgrade to Next.js 15 (stable). Add Zustand persistence for offline state.</div><div><span class="pill pill-green">Keep</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Mobile</div><div>RN 0.81 + React Nav 7</div><div style="color:var(--color-text-warning)">Add WatermelonDB now. Add Expo EAS for OTA. Wire all API calls. Remove Vision Camera until ML pipeline exists.</div><div><span class="pill pill-amber">Upgrade</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Backend framework</div><div>Express.js 4.21 monolith</div><div style="color:var(--color-text-warning)">Keep Express but restructure into domain modules (auth, booking, marketplace, payments). Add Fastify for high-throughput routes (price feeds). Do NOT split into microservices yet — too early.</div><div><span class="pill pill-amber">Refactor</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Auth</div><div>JWT only</div><div style="color:var(--color-text-danger)">Add refresh token rotation. Store refresh tokens in DB with device fingerprint. Revocation list in Redis. Short access token TTL (15 min).</div><div><span class="pill pill-red">Fix now</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Primary DB</div><div>PostgreSQL (Neon)</div><div style="color:var(--color-text-warning)">Keep Neon but enable connection pooling mode. Add PgBouncer. Enable PostGIS extension. Add read replica for analytics queries. Partition the prices table by month.</div><div><span class="pill pill-amber">Upgrade</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Cache</div><div>None</div><div style="color:var(--color-text-info)">Add Redis (Upstash for serverless, or self-hosted for cost control). Cache mandi prices (15 min TTL), weather (30 min), vendor listings by geo-hash (5 min), session data.</div><div><span class="pill pill-blue">Add</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Job queue</div><div>None</div><div style="color:var(--color-text-info)">Add BullMQ + Redis. Queues: notifications (SMS/WhatsApp/push), price ingestion (AGMARKNET cron), escrow auto-release (24h delayed job), weather alerts (cron).</div><div><span class="pill pill-blue">Add</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Real-time</div><div>None</div><div style="color:var(--color-text-info)">Add Socket.io for booking status rooms. SSE endpoint as fallback (better for low-bandwidth). Redis pub/sub as message broker between API instances.</div><div><span class="pill pill-blue">Add</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Search</div><div>None</div><div style="color:var(--color-text-info)">Phase 1: PostgreSQL full-text search (tsvector) for vendor discovery — good enough for 10K vendors. Phase 3+: Typesense (lighter than Elasticsearch, cheaper, better for Indian text). PostGIS for geo-search from day 1.</div><div><span class="pill pill-blue">Add</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">File storage</div><div>Planned S3</div><div style="color:var(--color-text-info)">Use Cloudflare R2 (cheaper egress than S3) + Cloudflare Images for WebP conversion and responsive serving. CDN is non-negotiable for 2G users.</div><div><span class="pill pill-blue">Add</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Payments</div><div>None</div><div style="color:var(--color-text-danger)">Razorpay is the right choice. Implement in this order: UPI intent → advance payment → Route escrow → auto-payout. Start Razorpay onboarding now — KYC takes 5–7 business days.</div><div><span class="pill pill-red">Add now</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Observability</div><div>None</div><div style="color:var(--color-text-danger)">Add Sentry (free tier) for error tracking immediately. Pino for structured JSON logs. BetterStack or Grafana Cloud for log aggregation. Without this, debugging production failures is impossible.</div><div><span class="pill pill-red">Add now</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">ORM</div><div>Prisma 5.22</div><div style="color:var(--color-text-success)">Keep. Add Prisma Accelerate (connection pooling proxy) instead of managing PgBouncer separately. Good DX, type-safe. Watch query N+1 patterns with bookings → payments → vendor.</div><div><span class="pill pill-green">Keep</span></div></div>
+    <div class="stack-row"><div style="font-weight:500;font-size:13px">Deployment</div><div>Not defined</div><div style="color:var(--color-text-danger)">Railway or Render for backend (Docker). Vercel for Next.js. Expo EAS for mobile. GitHub Actions for CI. Automated tests before every deploy. Health check endpoint /api/health.</div><div><span class="pill pill-red">Define now</span></div></div>
+  </div>
+</div>
+
+<!-- ARCHITECTURE PANEL -->
+<div id="p-arch" class="panel">
+  <p class="section-title">Revised architecture (modular monolith first, microservices later)</p>
+  <div class="arch-layer">
+    <div class="arch-layer-title">Client layer</div>
+    <div class="arch-items">
+      <span class="arch-item keep">Next.js 15 (Web)</span>
+      <span class="arch-item upgrade">React Native 0.81 + WatermelonDB</span>
+      <span class="arch-item new">Expo EAS (OTA updates)</span>
+      <span class="arch-item new">WhatsApp Bot (Gupshup)</span>
+      <span class="arch-item new">PWA (service worker)</span>
+      <span class="arch-item new">USSD fallback</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">Edge / CDN layer</div>
+    <div class="arch-items">
+      <span class="arch-item new">Cloudflare CDN</span>
+      <span class="arch-item new">Cloudflare R2 (object storage)</span>
+      <span class="arch-item new">Cloudflare Images (WebP + resize)</span>
+      <span class="arch-item new">DDoS protection</span>
+      <span class="arch-item new">Rate limiting at edge</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">API layer — modular Express (NOT microservices yet)</div>
+    <div class="arch-items">
+      <span class="arch-item keep">Express.js + TypeScript</span>
+      <span class="arch-item upgrade">Auth module (JWT + refresh token)</span>
+      <span class="arch-item keep">Booking module (existing calendar)</span>
+      <span class="arch-item new">Marketplace module (vendors + search)</span>
+      <span class="arch-item new">Payment module (Razorpay)</span>
+      <span class="arch-item new">Notification module (BullMQ workers)</span>
+      <span class="arch-item new">Socket.io (booking real-time)</span>
+      <span class="arch-item keep">Zod validation</span>
+      <span class="arch-item new">Helmet + CORS + rate-limit</span>
+      <span class="arch-item new">Pino structured logging</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">Async layer</div>
+    <div class="arch-items">
+      <span class="arch-item new">BullMQ (job queues)</span>
+      <span class="arch-item new">Notification workers (SMS/WA/Push)</span>
+      <span class="arch-item new">Price ingestion cron (AGMARKNET)</span>
+      <span class="arch-item new">Escrow auto-release (delayed jobs)</span>
+      <span class="arch-item new">Weather alert cron (IMD/OWM)</span>
+      <span class="arch-item new">KYC review queue</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">Cache + messaging layer</div>
+    <div class="arch-items">
+      <span class="arch-item new">Redis (Upstash serverless)</span>
+      <span class="arch-item new">Cache: prices, weather, vendor geo</span>
+      <span class="arch-item new">BullMQ broker</span>
+      <span class="arch-item new">Socket.io pub/sub adapter</span>
+      <span class="arch-item new">Rate limit counters</span>
+      <span class="arch-item new">Refresh token store</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">Data layer</div>
+    <div class="arch-items">
+      <span class="arch-item upgrade">PostgreSQL (Neon) + PostGIS + TimescaleDB ext</span>
+      <span class="arch-item new">Prisma Accelerate (connection pooling)</span>
+      <span class="arch-item new">Read replica (analytics queries)</span>
+      <span class="arch-item new">Partitioned prices table (by month)</span>
+      <span class="arch-item new">Typesense (vendor/service search — Phase 3)</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">External APIs (correctly sequenced)</div>
+    <div class="arch-items">
+      <span class="arch-item new">Razorpay (payments — start now)</span>
+      <span class="arch-item keep">MSG91 (OTP)</span>
+      <span class="arch-item keep">Firebase (push)</span>
+      <span class="arch-item upgrade">OpenWeatherMap → IMD (migrate Phase 5)</span>
+      <span class="arch-item keep">AGMARKNET (prices)</span>
+      <span class="arch-item keep">Gupshup (WhatsApp)</span>
+      <span class="arch-item new">KARZA/IDfy (KYC — Phase 2)</span>
+      <span class="arch-item new">Sarvam AI ASR (voice — Phase 6)</span>
+      <span class="arch-item new">Bhashini TTS/translate (Phase 6)</span>
+    </div>
+  </div>
+  <div class="arch-layer">
+    <div class="arch-layer-title">Deployment + CI/CD</div>
+    <div class="arch-items">
+      <span class="arch-item new">Railway / Render (backend Docker)</span>
+      <span class="arch-item new">Vercel (Next.js)</span>
+      <span class="arch-item new">Expo EAS (mobile builds + OTA)</span>
+      <span class="arch-item new">GitHub Actions (CI/CD)</span>
+      <span class="arch-item new">Sentry (error tracking)</span>
+      <span class="arch-item new">BetterStack (uptime + logs)</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+    <span style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px"><span class="arch-item keep" style="font-size:11px">Keep</span> existing, no change</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px"><span class="arch-item upgrade" style="font-size:11px">Upgrade</span> existing, modify</span>
+    <span style="font-size:12px;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px"><span class="arch-item new" style="font-size:11px">New</span> add to stack</span>
+  </div>
+</div>
+
+<!-- ROADMAP PANEL -->
+<div id="p-plan" class="panel">
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem">The original 7-phase roadmap is feature-focused. This revised plan is infrastructure-first, then features — because features without a reliable foundation collapse in production.</p>
+  
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">0</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Pre-flight (Weeks 1–2) — before writing a single feature</div><div style="font-size:12px;color:var(--color-text-secondary)">Non-negotiable foundation work</div></div></div>
+    <div class="phase-body">
+      <div class="issue-desc">These must be done before any new feature work. They are not optional and can't be done "later".</div>
+      <div class="tag-list"><span class="tag">Sentry error tracking</span><span class="tag">Pino structured logging</span><span class="tag">GitHub Actions CI/CD</span><span class="tag">Health check endpoint</span><span class="tag">Refresh token rotation</span><span class="tag">Rate limiting (express-rate-limit)</span><span class="tag">Helmet security headers</span><span class="tag">Razorpay onboarding (KYC form)</span><span class="tag">WatermelonDB on mobile</span><span class="tag">Wire mobile → all 17 API routes</span><span class="tag">Neon connection pooling</span><span class="tag">BetterStack uptime monitoring</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-danger);color:var(--color-text-danger)">1</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Infrastructure sprint (Weeks 3–6)</div><div style="font-size:12px;color:var(--color-text-secondary)">Redis + BullMQ + PostGIS + real-time</div></div></div>
+    <div class="phase-body">
+      <div class="issue-desc">Add all async infrastructure before any marketplace features. This sets the performance ceiling for everything that follows.</div>
+      <div class="tag-list"><span class="tag">Redis (Upstash) — cache + sessions</span><span class="tag">BullMQ notification workers</span><span class="tag">Price ingestion cron</span><span class="tag">PostGIS on Neon</span><span class="tag">Geo-search with ST_DWithin()</span><span class="tag">Socket.io booking rooms</span><span class="tag">Cloudflare R2 + Images</span><span class="tag">Image upload pipeline</span><span class="tag">Prisma Accelerate</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-warning);color:var(--color-text-warning)">2</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Vendor marketplace (Weeks 7–10) — original Phase 1</div><div style="font-size:12px;color:var(--color-text-secondary)">Now safe to build on solid infrastructure</div></div></div>
+    <div class="phase-body">
+      <div class="tag-list"><span class="tag">ServiceProvider model + routes</span><span class="tag">Manual KYC (photo upload + review)</span><span class="tag">ServiceListing CRUD</span><span class="tag">Category hierarchy</span><span class="tag">Geo-search vendor discovery</span><span class="tag">Vendor dashboard</span><span class="tag">Profile photos via Cloudflare</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-warning);color:var(--color-text-warning)">3</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Booking engine + payments (Weeks 11–16) — original Phases 2+3</div><div style="font-size:12px;color:var(--color-text-secondary)">Calendar + escrow + UPI in one sprint</div></div></div>
+    <div class="phase-body">
+      <div class="issue-desc">Booking and payments must ship together — a booking system with no payment is just a calendar. Merged to avoid launching a half-product.</div>
+      <div class="tag-list"><span class="tag">AvailabilitySlot model</span><span class="tag">Calendar blocking + transit buffer</span><span class="tag">Razorpay UPI intent</span><span class="tag">Escrow (Route API)</span><span class="tag">Advance + balance flow</span><span class="tag">Escrow auto-release (BullMQ delayed)</span><span class="tag">GST invoicing</span><span class="tag">TDS tracking (194-O)</span><span class="tag">Earnings dashboard</span><span class="tag">Booking SMS/WhatsApp confirmations</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-info);color:var(--color-text-info)">4</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Labor marketplace (Weeks 17–22) — original Phase 4</div><div style="font-size:12px;color:var(--color-text-secondary)">The #1 white-space opportunity</div></div></div>
+    <div class="phase-body">
+      <div class="tag-list"><span class="tag">LaborTeam + TeamMember models</span><span class="tag">Individual worker profiles</span><span class="tag">Job posting + bidding</span><span class="tag">QR attendance + GPS verify</span><span class="tag">Team leader dashboard</span><span class="tag">Substitute worker matching</span><span class="tag">Direct worker payments</span><span class="tag">Typesense for job/worker search</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-info);color:var(--color-text-info)">5</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Intelligence layer (Weeks 23–28) — original Phase 5</div><div style="font-size:12px;color:var(--color-text-secondary)">Weather, reviews, disputes, eKYC</div></div></div>
+    <div class="phase-body">
+      <div class="tag-list"><span class="tag">WeatherHold model + IMD integration</span><span class="tag">Auto-reschedule logic</span><span class="tag">Review + rating system</span><span class="tag">Dispute resolution workflow</span><span class="tag">Insurance add-on (Bajaj/ICICI API)</span><span class="tag">KARZA/IDfy eKYC (replace manual)</span><span class="tag">Admin dispute tools</span><span class="tag">Surge pricing engine</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-success);color:var(--color-text-success)">6</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Accessibility (Weeks 29–34) — original Phase 6</div><div style="font-size:12px;color:var(--color-text-secondary)">Voice, languages, WhatsApp bot</div></div></div>
+    <div class="phase-body">
+      <div class="tag-list"><span class="tag">Sarvam AI ASR (voice input)</span><span class="tag">Bhashini TTS + translation</span><span class="tag">10+ language UI</span><span class="tag">WhatsApp booking bot (Gupshup)</span><span class="tag">USSD *123# fallback</span><span class="tag">PWA + service worker</span><span class="tag">APK size optimisation (&lt;15MB)</span><span class="tag">IVR integration (Exotel)</span></div>
+    </div>
+  </div>
+
+  <div class="phase-card">
+    <div class="phase-header"><div class="phase-num" style="background:var(--color-background-success);color:var(--color-text-success)">7+</div><div><div style="font-size:14px;font-weight:500;color:var(--color-text-primary)">Scale (Weeks 35+) — original Phase 7</div><div style="font-size:12px;color:var(--color-text-secondary)">Livestock, drones, cold chain, satellite, fintech</div></div></div>
+    <div class="phase-body">
+      <div class="tag-list"><span class="tag">Livestock marketplace</span><span class="tag">Drone DaaS</span><span class="tag">Cold chain GPS monitoring</span><span class="tag">FPO group accounts</span><span class="tag">Credit/KCC integration</span><span class="tag">KisanGPT assistant</span><span class="tag">Sentinel Hub NDVI</span><span class="tag">Mapbox GL maps</span><span class="tag">Village Exchange</span><span class="tag">Microservices extraction (if warranted)</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRIORITY FIXES PANEL -->
+<div id="p-priority" class="panel">
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem">Sorted by: (impact × urgency) / effort. Top 10 things to do in the next 2 weeks, before touching any new feature.</p>
+  <div id="priorities"></div>
+</div>
+
+</div>
+
+<script>
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('p-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+const scoreData = [
+  { label: 'Web frontend', score: 8, note: 'Next.js 14 is solid. TanStack Query is excellent. Minor upgrades only.' },
+  { label: 'Mobile app', score: 3, note: 'Not wired to API. No offline mode. OTA updates missing. Vision Camera unused.' },
+  { label: 'Backend structure', score: 5, note: 'Express monolith is fine for now but no domain separation. Will need refactor at Phase 4.' },
+  { label: 'Auth security', score: 4, note: 'JWT-only is insufficient. No refresh rotation, no revocation, no rate limiting on auth routes.' },
+  { label: 'Database layer', score: 5, note: 'PostgreSQL is correct but missing PostGIS, read replica, connection pooling, and TimescaleDB ext.' },
+  { label: 'Async / queues', score: 1, note: 'Nothing. All notifications are synchronous. Will fail completely under harvest season load.' },
+  { label: 'Caching', score: 1, note: 'Nothing. Every mandi price, weather call, and vendor listing is fetched live on every request.' },
+  { label: 'Real-time', score: 1, note: 'Nothing. Booking status updates have no push mechanism. Farmer must refresh manually.' },
+  { label: 'Payments', score: 0, note: 'Zero implementation. The marketplace cannot function without this.' },
+  { label: 'Observability', score: 0, note: 'No logging, no error tracking, no uptime monitoring. Running blind in production.' },
+];
+
+const colors = ['#A32D2D','#A32D2D','#C09020','#C09020','#C09020','#A32D2D','#A32D2D','#A32D2D','#A32D2D','#A32D2D'];
+const fillColors = ['#E24B4A','#E24B4A','#EF9F27','#EF9F27','#EF9F27','#E24B4A','#E24B4A','#E24B4A','#E24B4A','#E24B4A'];
+
+let html = '';
+scoreData.forEach((d, i) => {
+  const pct = d.score * 10;
+  const fill = d.score <= 3 ? '#E24B4A' : d.score <= 6 ? '#EF9F27' : '#3B9A5C';
+  html += `<div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+      <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">${d.label}</span>
+      <span style="font-size:12px;color:var(--color-text-secondary);font-family:var(--font-mono)">${d.score}/10</span>
+    </div>
+    <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${fill}"></div></div>
+    <div style="font-size:12px;color:var(--color-text-secondary);margin-top:3px">${d.note}</div>
+  </div>`;
+});
+document.getElementById('scores').innerHTML = html;
+
+const priorities = [
+  { rank:1, title:'Start Razorpay merchant onboarding today', effort:'0 dev hours', impact:'Unblocks entire monetisation. Takes 5–7 days for KYC approval.', color:'var(--color-text-danger)' },
+  { rank:2, title:'Add Sentry + Pino logging to the backend', effort:'3 hours', impact:'Immediate production visibility. You currently have no idea what errors are happening.', color:'var(--color-text-danger)' },
+  { rank:3, title:'Wire all 17 API routes to the mobile app', effort:'2–3 days', impact:'The mobile app is currently a shell. Nothing works end-to-end on mobile.', color:'var(--color-text-danger)' },
+  { rank:4, title:'Add Redis (Upstash) + cache mandi prices + weather', effort:'1 day', impact:'Eliminates repeated API calls. Reduces latency from 600ms to 20ms for the most common requests.', color:'var(--color-text-danger)' },
+  { rank:5, title:'Implement refresh token rotation (auth security fix)', effort:'4 hours', impact:'Prevents stolen JWT attacks. Required before any financial data is in the system.', color:'var(--color-text-danger)' },
+  { rank:6, title:'Add BullMQ + notification workers', effort:'1 day', impact:'Decouples SMS/WA/push from API response cycle. Prevents timeout cascade during harvest season.', color:'var(--color-text-warning)' },
+  { rank:7, title:'Enable PostGIS on Neon + add geo-index to users table', effort:'2 hours', impact:'Enables the "services near me" query that is the #1 feature in the marketplace. Currently impossible.', color:'var(--color-text-warning)' },
+  { rank:8, title:'Add WatermelonDB to mobile + offline price cache', effort:'2 days', impact:'Makes the app usable in areas with no signal. Core requirement for rural India adoption.', color:'var(--color-text-warning)' },
+  { rank:9, title:'Set up GitHub Actions CI/CD with health check', effort:'4 hours', impact:'Automated deploys with rollback. Prevents manual 3AM deployments. Catches regressions before production.', color:'var(--color-text-warning)' },
+  { rank:10, title:'Add Neon connection pooling + Prisma connection_limit', effort:'1 hour', impact:'Prevents "too many connections" crash under concurrent load. One config change.', color:'var(--color-text-warning)' },
+];
+
+let phtml = '';
+priorities.forEach(p => {
+  phtml += `<div class="card" style="margin-bottom:.5rem">
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div style="width:24px;height:24px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0;color:${p.color}">${p.rank}</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px">${p.title}</div>
+        <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:4px">${p.impact}</div>
+        <span class="badge badge-blue">${p.effort}</span>
+      </div>
+    </div>
+  </div>`;
+});
+document.getElementById('priorities').innerHTML = phtml;
+</script>

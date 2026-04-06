@@ -27,6 +27,9 @@ import schemeRoutes from './routes/schemes';
 import inventoryRoutes from './routes/inventory';
 import communityRoutes from './routes/community';
 import roleRoutes from './routes/roles';
+import uploadRoutes from './routes/upload';
+import providerRoutes from './routes/providers';
+import serviceRoutes from './routes/services';
 
 const app = express();
 
@@ -122,6 +125,9 @@ app.use('/api/schemes', schemeRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/rbac', roleRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/providers', providerRoutes);
+app.use('/api/services', serviceRoutes);
 
 // Sentry error handler (must be before custom error handler)
 Sentry.setupExpressErrorHandler(app);

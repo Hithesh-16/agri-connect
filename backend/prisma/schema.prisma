@@ -72,6 +72,7 @@ model User {
   refreshTokens      RefreshToken[]
   userRoles          UserRole[]
   auditLogs          AuditLog[]
+  serviceProvider    ServiceProvider?
   organizationId     String?
   organization       Organization? @relation(fields: [organizationId], references: [id])
 
@@ -500,4 +501,159 @@ model CommunityComment {
   user User          @relation(fields: [userId], references: [id])
 
   @@map("community_comments")
+}
+
+// ─── SERVICE MARKETPLACE (Phase 1) ───────────────────────
+
+enum ProviderType {
+  MACHINERY_OWNER
+  INPUT_DEALER
+  TRANSPORTER
+  LABOR_INDIVIDUAL
+  LABOR_TEAM_LEADER
+  LIVESTOCK_DEALER
+  DRONE_OPERATOR
+  PROFESSIONAL
+}
+
+enum KYCStatus {
+  NOT_STARTED
+  SUBMITTED
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+}
+
+enum PricingType {
+  FIXED
+  NEGOTIABLE
+  BID_BASED
+}
+
+enum PricingUnit {
+  PER_HOUR
+  PER_DAY
+  PER_ACRE
+  PER_UNIT
+  PER_KG
+  PER_QUINTAL
+  PER_TRIP
+  PER_WORKER_DAY
+  FIXED
+}
+
+enum BookingType {
+  SLOT
+  DAY
+  MULTI_DAY
+  ON_DEMAND
+}
+
+model ServiceProvider {
+  id              String       @id @default(cuid())
+  userId          String       @unique
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            ProviderType
+  businessName    String?
+  description     String?
+  profilePhoto    String?
+  serviceRadius   Int          @default(25) // km
+  languages       String[]     @default(["te", "hi", "en"])
+  experience      Int?         // years
+
+  // Location (for PostGIS queries)
+  latitude        Float?
+  longitude       Float?
+  address         String?
+  village         String?
+  district        String?
+  state           String?
+
+  // KYC
+  kycStatus       KYCStatus    @default(NOT_STARTED)
+  aadhaarNumber   String?      // Encrypted at rest
+  panNumber       String?
+  gstNumber       String?
+  bankAccountNo   String?      // Encrypted
+  bankIfsc        String?
+  kycDocuments    String[]     // S3 URLs for uploaded docs
+  kycSubmittedAt  DateTime?
+  kycVerifiedAt   DateTime?
+  kycReviewNote   String?
+
+  // Stats
+  rating          Decimal      @db.Decimal(3, 2) @default(0)
+  totalBookings   Int          @default(0)
+  completionRate  Decimal      @db.Decimal(5, 2) @default(100)
+  responseTime    Int?         // avg minutes to respond
+  isVerified      Boolean      @default(false)
+  isActive        Boolean      @default(true)
+
+  listings        ServiceListing[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([latitude, longitude])
+  @@index([type])
+  @@index([district, state])
+  @@index([kycStatus])
+  @@map("service_providers")
+}
+
+model ServiceCategory {
+  id              String   @id @default(cuid())
+  name            Json     // { en: "Machinery", te: "యంత్రాలు", hi: "मशीनरी" }
+  slug            String   @unique
+  description     Json?    // multilingual description
+  icon            String   @default("🔧")
+  parentId        String?
+  parent          ServiceCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children        ServiceCategory[] @relation("CategoryHierarchy")
+  sortOrder       Int      @default(0)
+  bookingType     BookingType @default(DAY)
+  defaultUnit     PricingUnit @default(PER_DAY)
+  requiresLicense Boolean  @default(false)
+  isActive        Boolean  @default(true)
+
+  listings        ServiceListing[]
+  createdAt       DateTime @default(now())
+
+  @@index([parentId])
+  @@map("service_categories")
+}
+
+model ServiceListing {
+  id                  String   @id @default(cuid())
+  providerId          String
+  provider            ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  categoryId          String
+  category            ServiceCategory @relation(fields: [categoryId], references: [id])
+
+  title               Json     // { en: "Tractor for hire", te: "అద్దెకు ట్రాక్టర్" }
+  description         Json?    // multilingual
+  images              String[] // S3 URLs
+  pricingType         PricingType @default(FIXED)
+  pricePerUnit        Decimal  @db.Decimal(10, 2)
+  unit                PricingUnit @default(PER_DAY)
+  minBookingDuration  Int      @default(1) // minimum booking in units
+
+  // Equipment details (for machinery/drones)
+  equipmentMake       String?
+  equipmentModel      String?
+  equipmentYear       Int?
+  equipmentHP         Int?     // horsepower
+  equipmentDetails    Json?    // flexible extra fields
+
+  // Availability
+  isActive            Boolean  @default(true)
+  isPaused            Boolean  @default(false)
+  seasonalAvailable   String[] // ["kharif", "rabi", "summer"]
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([providerId])
+  @@index([categoryId])
+  @@index([isActive, isPaused])
+  @@map("service_listings")
 }

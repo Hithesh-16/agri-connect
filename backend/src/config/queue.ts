@@ -23,6 +23,7 @@ export const QUEUES = {
   SMS: 'sms',
   AUDIT_LOG: 'audit-log',
   PRICE_UPDATE: 'price-update',
+  RECURRING_BOOKING: 'recurring-bookings',
 } as const;
 
 type QueueName = (typeof QUEUES)[keyof typeof QUEUES];

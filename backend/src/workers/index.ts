@@ -1,5 +1,6 @@
 import { startNotificationWorker } from './notificationWorker';
 import { startAuditWorker } from './auditWorker';
+import { startRecurringBookingWorker } from './recurringBookingWorker';
 import { createChildLogger } from '../config/logger';
 
 const log = createChildLogger('workers');
@@ -13,5 +14,6 @@ export function startWorkers() {
 
   startNotificationWorker();
   startAuditWorker();
-  log.info('All workers started');
+  startRecurringBookingWorker();
+  log.info('All workers started (notification, audit, recurring-bookings)');
 }

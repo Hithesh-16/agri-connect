@@ -34,6 +34,7 @@ const PERMISSIONS = [
   { resource: 'bookings', action: 'create' },
   { resource: 'bookings', action: 'read' },
   { resource: 'bookings', action: 'update' },
+  { resource: 'bookings', action: 'delete' },
   { resource: 'bookings', action: 'manage' },
   // Payments
   { resource: 'payments', action: 'read' },
@@ -64,6 +65,26 @@ const PERMISSIONS = [
   { resource: 'reviews', action: 'read' },
   // Audit
   { resource: 'audit', action: 'read' },
+  // Teams (Phase 4)
+  { resource: 'teams', action: 'create' },
+  { resource: 'teams', action: 'read' },
+  { resource: 'teams', action: 'update' },
+  { resource: 'teams', action: 'delete' },
+  // Jobs (Phase 4)
+  { resource: 'jobs', action: 'create' },
+  { resource: 'jobs', action: 'read' },
+  { resource: 'jobs', action: 'update' },
+  { resource: 'jobs', action: 'delete' },
+  // Bids (Phase 4)
+  { resource: 'bids', action: 'create' },
+  { resource: 'bids', action: 'read' },
+  { resource: 'bids', action: 'update' },
+  // Attendance (Phase 4)
+  { resource: 'attendance', action: 'create' },
+  { resource: 'attendance', action: 'read' },
+  { resource: 'attendance', action: 'update' },
+  // Payments - create (needed for distribute-payment)
+  { resource: 'payments', action: 'create' },
   // All (superadmin wildcard)
   { resource: '*', action: 'manage' },
 ];
@@ -87,6 +108,7 @@ const ROLE_PERMISSIONS: Record<string, { resource: string; action: string; scope
     { resource: 'bookings', action: 'create', scope: 'own' },
     { resource: 'bookings', action: 'read', scope: 'own' },
     { resource: 'bookings', action: 'update', scope: 'own' },
+    { resource: 'bookings', action: 'delete', scope: 'own' },
     { resource: 'listings', action: 'create', scope: 'own' },
     { resource: 'listings', action: 'read', scope: 'all' },
     { resource: 'listings', action: 'update', scope: 'own' },
@@ -99,6 +121,16 @@ const ROLE_PERMISSIONS: Record<string, { resource: string; action: string; scope
     { resource: 'reviews', action: 'read', scope: 'all' },
     { resource: 'disputes', action: 'create', scope: 'own' },
     { resource: 'disputes', action: 'read', scope: 'own' },
+    // Phase 4: Labor marketplace
+    { resource: 'jobs', action: 'create', scope: 'own' },
+    { resource: 'jobs', action: 'read', scope: 'all' },
+    { resource: 'jobs', action: 'update', scope: 'own' },
+    { resource: 'jobs', action: 'delete', scope: 'own' },
+    { resource: 'bids', action: 'read', scope: 'own' },
+    { resource: 'bids', action: 'update', scope: 'own' },
+    { resource: 'attendance', action: 'create', scope: 'own' },
+    { resource: 'attendance', action: 'read', scope: 'own' },
+    { resource: 'payments', action: 'create', scope: 'own' },
   ],
   VENDOR: [
     { resource: 'services', action: 'create', scope: 'own' },
@@ -111,12 +143,26 @@ const ROLE_PERMISSIONS: Record<string, { resource: string; action: string; scope
     { resource: 'reviews', action: 'read', scope: 'all' },
     { resource: 'disputes', action: 'create', scope: 'own' },
     { resource: 'disputes', action: 'read', scope: 'own' },
+    // Phase 4: Labor marketplace
+    { resource: 'jobs', action: 'read', scope: 'all' },
+    { resource: 'bids', action: 'create', scope: 'own' },
+    { resource: 'bids', action: 'read', scope: 'own' },
+    { resource: 'attendance', action: 'create', scope: 'own' },
+    { resource: 'attendance', action: 'read', scope: 'own' },
+    { resource: 'attendance', action: 'update', scope: 'own' },
   ],
   LABOR_INDIVIDUAL: [
     { resource: 'services', action: 'read', scope: 'all' },
     { resource: 'bookings', action: 'read', scope: 'own' },
     { resource: 'bookings', action: 'update', scope: 'own' },
     { resource: 'payments', action: 'read', scope: 'own' },
+    // Phase 4: Labor marketplace
+    { resource: 'jobs', action: 'read', scope: 'all' },
+    { resource: 'bids', action: 'create', scope: 'own' },
+    { resource: 'bids', action: 'read', scope: 'own' },
+    { resource: 'attendance', action: 'create', scope: 'own' },
+    { resource: 'attendance', action: 'read', scope: 'own' },
+    { resource: 'attendance', action: 'update', scope: 'own' },
   ],
   LABOR_TEAM_LEADER: [
     { resource: 'services', action: 'create', scope: 'own' },
@@ -125,6 +171,17 @@ const ROLE_PERMISSIONS: Record<string, { resource: string; action: string; scope
     { resource: 'bookings', action: 'read', scope: 'organization' },
     { resource: 'bookings', action: 'update', scope: 'organization' },
     { resource: 'payments', action: 'read', scope: 'organization' },
+    // Phase 4: Labor marketplace
+    { resource: 'teams', action: 'create', scope: 'own' },
+    { resource: 'teams', action: 'read', scope: 'own' },
+    { resource: 'teams', action: 'update', scope: 'own' },
+    { resource: 'teams', action: 'delete', scope: 'own' },
+    { resource: 'jobs', action: 'read', scope: 'all' },
+    { resource: 'bids', action: 'create', scope: 'own' },
+    { resource: 'bids', action: 'read', scope: 'own' },
+    { resource: 'attendance', action: 'create', scope: 'organization' },
+    { resource: 'attendance', action: 'read', scope: 'organization' },
+    { resource: 'attendance', action: 'update', scope: 'organization' },
   ],
   FPO_ADMIN: [
     { resource: 'users', action: 'read', scope: 'organization' },

@@ -1,4 +1,5 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -8,6 +9,8 @@ import { initSentry, Sentry } from './config/sentry';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import { startWorkers } from './workers';
+import { initializeSocket } from './services/socketService';
+import { API_ROUTES, RATE_LIMIT } from './constants';
 
 // Route imports
 import authRoutes from './routes/auth';
@@ -30,8 +33,18 @@ import roleRoutes from './routes/roles';
 import uploadRoutes from './routes/upload';
 import providerRoutes from './routes/providers';
 import serviceRoutes from './routes/services';
+import bookingRoutes from './routes/bookings';
+import availabilityRoutes from './routes/availability';
+import chatRoutes from './routes/chat';
+import notificationRoutes from './routes/notifications';
+import deviceRoutes from './routes/devices';
+import paymentRoutes from './routes/payments';
+import teamRoutes from './routes/teams';
+import jobRoutes from './routes/jobs';
+import attendanceRoutes from './routes/attendance';
 
 const app = express();
+const httpServer = createServer(app);
 
 // Initialize Sentry (must be before routes)
 initSentry();
@@ -45,8 +58,8 @@ app.use(cors({
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 200, // 200 requests per window
+  windowMs: RATE_LIMIT.WINDOW_MS,
+  max: RATE_LIMIT.MAX_GENERAL,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many requests. Please try again later.' },
@@ -55,8 +68,8 @@ app.use(limiter);
 
 // Stricter rate limit for auth endpoints
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
+  windowMs: RATE_LIMIT.WINDOW_MS,
+  max: RATE_LIMIT.MAX_AUTH,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, error: 'Too many auth attempts. Please try again later.' },
@@ -70,7 +83,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 // Health check (detailed: DB + Redis status)
-app.get('/api/health', async (_req, res) => {
+app.get(API_ROUTES.HEALTH, async (_req, res) => {
   let dbStatus = 'disconnected';
   let redisStatus = 'not configured';
   try {
@@ -108,26 +121,35 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // API Routes
-app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/crops', cropRoutes);
-app.use('/api/mandis', mandiRoutes);
-app.use('/api/prices/history', priceHistoryRoutes);
-app.use('/api/prices', priceRoutes);
-app.use('/api/weather', weatherRoutes);
-app.use('/api/news', newsRoutes);
-app.use('/api/scanner', scannerRoutes);
-app.use('/api/supply-chain', supplyChainRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/alerts', alertRoutes);
-app.use('/api/calendar', calendarRoutes);
-app.use('/api/listings', listingRoutes);
-app.use('/api/schemes', schemeRoutes);
-app.use('/api/inventory', inventoryRoutes);
-app.use('/api/community', communityRoutes);
-app.use('/api/rbac', roleRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/providers', providerRoutes);
-app.use('/api/services', serviceRoutes);
+app.use(API_ROUTES.AUTH, authLimiter, authRoutes);
+app.use(API_ROUTES.CROPS, cropRoutes);
+app.use(API_ROUTES.MANDIS, mandiRoutes);
+app.use(API_ROUTES.PRICE_HISTORY, priceHistoryRoutes);
+app.use(API_ROUTES.PRICES, priceRoutes);
+app.use(API_ROUTES.WEATHER, weatherRoutes);
+app.use(API_ROUTES.NEWS, newsRoutes);
+app.use(API_ROUTES.SCANNER, scannerRoutes);
+app.use(API_ROUTES.SUPPLY_CHAIN, supplyChainRoutes);
+app.use(API_ROUTES.USERS, userRoutes);
+app.use(API_ROUTES.ALERTS, alertRoutes);
+app.use(API_ROUTES.CALENDAR, calendarRoutes);
+app.use(API_ROUTES.LISTINGS, listingRoutes);
+app.use(API_ROUTES.SCHEMES, schemeRoutes);
+app.use(API_ROUTES.INVENTORY, inventoryRoutes);
+app.use(API_ROUTES.COMMUNITY, communityRoutes);
+app.use(API_ROUTES.RBAC, roleRoutes);
+app.use(API_ROUTES.UPLOAD, uploadRoutes);
+app.use(API_ROUTES.PROVIDERS, providerRoutes);
+app.use(API_ROUTES.SERVICES, serviceRoutes);
+app.use(API_ROUTES.BOOKINGS, bookingRoutes);
+app.use(API_ROUTES.AVAILABILITY, availabilityRoutes);
+app.use(API_ROUTES.CHAT, chatRoutes);
+app.use(API_ROUTES.NOTIFICATIONS, notificationRoutes);
+app.use(API_ROUTES.DEVICES, deviceRoutes);
+app.use(API_ROUTES.PAYMENTS, paymentRoutes);
+app.use(API_ROUTES.TEAMS, teamRoutes);
+app.use(API_ROUTES.JOBS, jobRoutes);
+app.use(API_ROUTES.ATTENDANCE, attendanceRoutes);
 
 // Sentry error handler (must be before custom error handler)
 Sentry.setupExpressErrorHandler(app);
@@ -142,11 +164,14 @@ async function main() {
     await prisma.$connect();
     logger.info('Database connected');
 
-    // Start background workers (notifications, audit logging)
+    // Start background workers (notifications, audit logging, recurring bookings)
     startWorkers();
 
-    app.listen(config.port, () => {
-      logger.info({ port: config.port, env: config.nodeEnv }, 'KisanConnect API started');
+    // Initialize Socket.io
+    initializeSocket(httpServer);
+
+    httpServer.listen(config.port, () => {
+      logger.info({ port: config.port, env: config.nodeEnv }, 'KisanConnect API started (HTTP + WebSocket)');
     });
   } catch (error) {
     logger.fatal({ err: error }, 'Failed to start server');

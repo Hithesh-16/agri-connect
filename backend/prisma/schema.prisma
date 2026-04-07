@@ -73,8 +73,14 @@ model User {
   userRoles          UserRole[]
   auditLogs          AuditLog[]
   serviceProvider    ServiceProvider?
+  wallet             Wallet?
   organizationId     String?
   organization       Organization? @relation(fields: [organizationId], references: [id])
+  farmerBookings     Booking[]          @relation("FarmerBookings")
+  farmerChats        ChatConversation[] @relation("FarmerChats")
+  notifications      Notification[]
+  deviceTokens       DeviceToken[]
+  jobPostings        JobPosting[]
 
   @@map("users")
 }
@@ -589,9 +595,16 @@ model ServiceProvider {
   isVerified      Boolean      @default(false)
   isActive        Boolean      @default(true)
 
-  listings        ServiceListing[]
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  listings          ServiceListing[]
+  bookings          Booking[]
+  availabilitySlots AvailabilitySlot[]
+  chatConversations ChatConversation[] @relation("ProviderChats")
+  payouts           Payout[]
+  taxProfile        TaxProfile?
+  laborTeams        LaborTeam[]
+  bids              Bid[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@index([latitude, longitude])
   @@index([type])
@@ -622,6 +635,227 @@ model ServiceCategory {
   @@map("service_categories")
 }
 
+// ─── BOOKING SYSTEM (Phase 2) ────────────────────────────
+
+model Booking {
+  id                String   @id @default(cuid())
+  bookingNumber     String   @unique // "KC-BK-20260415-0001"
+
+  // Parties
+  farmerId          String
+  providerId        String
+  serviceListingId  String
+
+  // Booking type (inherited from category)
+  bookingType       String   // "SLOT" | "DAY" | "MULTI_DAY" | "ON_DEMAND"
+
+  // Schedule
+  startDate         DateTime
+  endDate           DateTime
+  slotType          String?  // "MORNING" | "AFTERNOON" | "FULL_DAY"
+
+  // Location
+  farmLocation      Json     // { lat, lng, village, mandal, district, state, address }
+  farmSize          Float?   // Acres (for per-acre pricing)
+  cropType          String?
+
+  // Pricing
+  basePrice         Float
+  platformFee       Float
+  gstAmount         Float
+  totalAmount       Float
+  advanceAmount     Float?
+  balanceAmount     Float?
+
+  // State Machine
+  status            String   @default("PENDING")
+  statusHistory     Json[]   // [{ status, timestamp, changedBy, reason }]
+
+  // Cancellation
+  cancelledBy       String?  // "FARMER" | "PROVIDER" | "SYSTEM"
+  cancellationReason String?
+  cancellationFee   Float?
+
+  // Weather
+  weatherHoldReason  String?
+  originalStartDate  DateTime?
+  rescheduledFrom    String?
+
+  // Completion
+  completedAt        DateTime?
+  farmerConfirmed    Boolean  @default(false)
+  providerConfirmed  Boolean  @default(false)
+  autoConfirmedAt    DateTime?
+
+  // Recurring
+  recurringBookingId String?
+
+  // Notes
+  farmerNotes        String?
+  providerNotes      String?
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  farmer             User              @relation("FarmerBookings", fields: [farmerId], references: [id])
+  provider           ServiceProvider   @relation(fields: [providerId], references: [id])
+  serviceListing     ServiceListing    @relation(fields: [serviceListingId], references: [id])
+  recurringBooking   RecurringBooking? @relation(fields: [recurringBookingId], references: [id])
+  chatConversation   ChatConversation?
+  payments           Payment[]
+
+  @@index([farmerId, status])
+  @@index([providerId, status])
+  @@index([startDate, endDate])
+  @@index([status, createdAt])
+  @@map("bookings")
+}
+
+model AvailabilitySlot {
+  id               String   @id @default(cuid())
+  providerId       String
+  serviceListingId String?
+
+  date             DateTime @db.Date
+  slotType         String   // "MORNING" | "AFTERNOON" | "FULL_DAY"
+  isAvailable      Boolean  @default(true)
+  isBlocked        Boolean  @default(false)
+  blockReason      String?  // "TRANSIT" | "MAINTENANCE" | "PERSONAL" | "BOOKED"
+
+  transitFromBookingId      String?
+  transitHours              Int?
+  maintenanceAfterBookingId String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  provider         ServiceProvider @relation(fields: [providerId], references: [id])
+
+  @@unique([providerId, date, slotType, serviceListingId])
+  @@index([providerId, date, isAvailable])
+  @@map("availability_slots")
+}
+
+model RecurringBooking {
+  id               String   @id @default(cuid())
+  farmerId         String
+  providerId       String
+  serviceListingId String
+
+  frequency        String   // "WEEKLY" | "BIWEEKLY" | "MONTHLY"
+  dayOfWeek        Int?     // 0-6
+  dayOfMonth       Int?     // 1-31
+  slotType         String?
+
+  startDate        DateTime
+  endDate          DateTime?
+
+  isActive         Boolean  @default(true)
+  nextOccurrence   DateTime?
+  totalGenerated   Int      @default(0)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  bookings         Booking[]
+
+  @@map("recurring_bookings")
+}
+
+// ─── CHAT SYSTEM (Phase 2) ──────────────────────────────
+
+model ChatConversation {
+  id              String   @id @default(cuid())
+  bookingId       String?  @unique
+
+  farmerId        String
+  providerId      String
+
+  lastMessageAt   DateTime?
+  farmerUnread    Int      @default(0)
+  providerUnread  Int      @default(0)
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  booking         Booking?          @relation(fields: [bookingId], references: [id])
+  farmer          User              @relation("FarmerChats", fields: [farmerId], references: [id])
+  provider        ServiceProvider   @relation("ProviderChats", fields: [providerId], references: [id])
+  messages        ChatMessage[]
+
+  @@index([farmerId, lastMessageAt])
+  @@index([providerId, lastMessageAt])
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id              String   @id @default(cuid())
+  conversationId  String
+  senderId        String
+
+  type            String   @default("TEXT") // "TEXT" | "IMAGE" | "LOCATION" | "BOOKING_UPDATE" | "VOICE"
+  content         String
+  metadata        Json?
+
+  isRead          Boolean  @default(false)
+  readAt          DateTime?
+  isDeleted       Boolean  @default(false)
+
+  createdAt       DateTime @default(now())
+
+  conversation    ChatConversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("chat_messages")
+}
+
+// ─── NOTIFICATION SYSTEM (Phase 2) ──────────────────────
+
+model Notification {
+  id              String   @id @default(cuid())
+  userId          String
+
+  type            String   // "BOOKING_CREATED" | "BOOKING_CONFIRMED" | etc.
+  title           Json     // { "en": "...", "te": "...", "hi": "..." }
+  body            Json     // { "en": "...", "te": "...", "hi": "..." }
+  data            Json?    // { bookingId, screen, params }
+
+  channel         String[] // ["PUSH", "SMS", "IN_APP"]
+
+  isRead          Boolean  @default(false)
+  readAt          DateTime?
+
+  pushSent        Boolean  @default(false)
+  pushSentAt      DateTime?
+  smsSent         Boolean  @default(false)
+  smsSentAt       DateTime?
+
+  createdAt       DateTime @default(now())
+
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+model DeviceToken {
+  id              String   @id @default(cuid())
+  userId          String
+  token           String   @unique
+  platform        String   // "ANDROID" | "IOS" | "WEB"
+  isActive        Boolean  @default(true)
+  lastUsedAt      DateTime @default(now())
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, isActive])
+  @@map("device_tokens")
+}
+
 model ServiceListing {
   id                  String   @id @default(cuid())
   providerId          String
@@ -649,6 +883,8 @@ model ServiceListing {
   isPaused            Boolean  @default(false)
   seasonalAvailable   String[] // ["kharif", "rabi", "summer"]
 
+  bookings            Booking[]
+
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
@@ -656,4 +892,452 @@ model ServiceListing {
   @@index([categoryId])
   @@index([isActive, isPaused])
   @@map("service_listings")
+}
+
+// ─── PAYMENT SYSTEM (Phase 3) ────────────────────────────
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PaymentMethod {
+  UPI
+  CARD
+  NET_BANKING
+  WALLET
+  CASH
+  UPI_ADVANCE_CASH_BALANCE
+}
+
+enum PaymentFlowType {
+  FULL_PREPAY
+  ADVANCE_BALANCE
+  POST_PAY
+  CASH_SPLIT
+}
+
+enum EscrowStatus {
+  NOT_APPLICABLE
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model Payment {
+  id                  String   @id @default(cuid())
+  bookingId           String
+  payerId             String   // farmer userId
+  payeeProviderId     String   // service provider id
+
+  // Razorpay
+  razorpayOrderId     String?  @unique
+  razorpayPaymentId   String?  @unique
+  razorpaySignature   String?
+
+  // Amounts
+  amount              Decimal  @db.Decimal(15, 4)
+  currency            String   @default("INR")
+  platformFee         Decimal  @db.Decimal(15, 4) @default(0)
+  gstOnFee            Decimal  @db.Decimal(15, 4) @default(0) // 18% GST on platform fee
+  tdsAmount           Decimal  @db.Decimal(15, 4) @default(0) // Section 194-O
+
+  // Flow & Status
+  flowType            PaymentFlowType @default(FULL_PREPAY)
+  paymentType         String   @default("FULL") // "FULL" | "ADVANCE" | "BALANCE" | "REFUND"
+  method              PaymentMethod?
+  status              PaymentStatus @default(PENDING)
+
+  // Escrow
+  escrowStatus        EscrowStatus @default(NOT_APPLICABLE)
+  escrowReleasedAt    DateTime?
+  escrowReleaseJobId  String?  // BullMQ delayed job ID for auto-release
+
+  // Refund
+  refundAmount        Decimal? @db.Decimal(15, 4)
+  refundReason        String?
+  refundedAt          DateTime?
+  razorpayRefundId    String?
+
+  // Metadata
+  description         String?
+  metadata            Json?
+  failureReason       String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  booking             Booking  @relation(fields: [bookingId], references: [id])
+  invoice             Invoice?
+
+  @@index([bookingId])
+  @@index([payerId])
+  @@index([payeeProviderId])
+  @@index([razorpayOrderId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Wallet {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  balance       Decimal  @db.Decimal(15, 4) @default(0)
+  currency      String   @default("INR")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transactions  WalletTransaction[]
+  user          User     @relation(fields: [userId], references: [id])
+
+  @@map("wallets")
+}
+
+model WalletTransaction {
+  id              String   @id @default(cuid())
+  walletId        String
+  amount          Decimal  @db.Decimal(15, 4)
+  type            String   // "CREDIT" | "DEBIT"
+  source          String   // "PAYMENT" | "REFUND" | "CASHBACK" | "PAYOUT" | "TOPUP" | "WITHDRAWAL"
+  referenceId     String?  // paymentId, payoutId, etc.
+  description     String?
+  balanceBefore   Decimal  @db.Decimal(15, 4)
+  balanceAfter    Decimal  @db.Decimal(15, 4)
+  createdAt       DateTime @default(now())
+
+  wallet          Wallet   @relation(fields: [walletId], references: [id])
+
+  @@index([walletId, createdAt])
+  @@map("wallet_transactions")
+}
+
+model Payout {
+  id                  String   @id @default(cuid())
+  providerId          String
+  amount              Decimal  @db.Decimal(15, 4)
+  currency            String   @default("INR")
+  status              PayoutStatus @default(PENDING)
+
+  // Razorpay payout
+  razorpayPayoutId    String?  @unique
+  razorpayContactId   String?
+  razorpayFundAccountId String?
+
+  // Settlement period
+  periodStart         DateTime
+  periodEnd           DateTime
+  bookingCount        Int      @default(0)
+  grossAmount         Decimal  @db.Decimal(15, 4) @default(0)
+  commissionTotal     Decimal  @db.Decimal(15, 4) @default(0)
+  tdsTotal            Decimal  @db.Decimal(15, 4) @default(0)
+  netAmount           Decimal  @db.Decimal(15, 4) @default(0)
+
+  // Bank details snapshot
+  bankAccountNo       String?
+  bankIfsc            String?
+  bankName            String?
+
+  processedAt         DateTime?
+  failureReason       String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  provider            ServiceProvider @relation(fields: [providerId], references: [id])
+
+  @@index([providerId, status])
+  @@index([periodStart, periodEnd])
+  @@map("payouts")
+}
+
+model Invoice {
+  id              String   @id @default(cuid())
+  paymentId       String   @unique
+  invoiceNumber   String   @unique // "KC-INV-20260415-0001"
+  type            String   @default("BOOKING") // "BOOKING" | "SUBSCRIPTION" | "PAYOUT"
+
+  // Parties
+  farmerName      String?
+  farmerMobile    String?
+  farmerAddress   String?
+  providerName    String?
+  providerGstin   String?
+
+  // Line items
+  lineItems       Json     // [{ description, qty, rate, amount }]
+  subtotal        Decimal  @db.Decimal(15, 4)
+  platformFee     Decimal  @db.Decimal(15, 4) @default(0)
+  gst             Decimal  @db.Decimal(15, 4) @default(0)
+  total           Decimal  @db.Decimal(15, 4)
+
+  pdfUrl          String?  // S3 URL to generated PDF
+
+  createdAt       DateTime @default(now())
+
+  payment         Payment  @relation(fields: [paymentId], references: [id])
+
+  @@index([invoiceNumber])
+  @@map("invoices")
+}
+
+model TaxProfile {
+  id              String   @id @default(cuid())
+  providerId      String   @unique
+  panNumber       String?  // Validated PAN
+  panVerified     Boolean  @default(false)
+  gstNumber       String?
+  gstVerified     Boolean  @default(false)
+
+  // TDS tracking (Section 194-O)
+  financialYear   String   @default("2026-27") // "YYYY-YY"
+  totalPayouts    Decimal  @db.Decimal(15, 4) @default(0)
+  totalTdsDeducted Decimal @db.Decimal(15, 4) @default(0)
+  tdsThreshold    Decimal  @db.Decimal(15, 4) @default(500000) // INR 5L
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider        ServiceProvider @relation(fields: [providerId], references: [id])
+
+  @@index([financialYear])
+  @@map("tax_profiles")
+}
+
+// ─── LABOR MARKETPLACE (Phase 4) ────────────────────────
+
+model LaborTeam {
+  id                  String   @id @default(cuid())
+  leaderId            String
+
+  name                Json     // { "en": "Raju's Harvesting Team", "te": "రాజు కోత జట్టు" }
+  description         Json?
+
+  // Skills (aggregated from members)
+  skills              String[] // ["weeding", "transplanting", "harvesting"]
+  primarySkill        String
+
+  // Capacity
+  maxMembers          Int      @default(20)
+  activeMembers       Int      @default(0)
+
+  // Location
+  baseLocation        Json     // { lat, lng, village, mandal, district, state }
+  serviceRadius       Int      @default(30) // km
+
+  // Rates
+  dailyRatePerWorker  Float
+  minimumWorkers      Int      @default(1)
+
+  // Stats
+  rating              Float    @default(0)
+  totalJobs           Int      @default(0)
+  completionRate      Float    @default(0)
+
+  isActive            Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  leader              ServiceProvider @relation(fields: [leaderId], references: [id])
+  members             TeamMember[]
+  bids                Bid[]
+
+  @@index([leaderId])
+  @@map("labor_teams")
+}
+
+model TeamMember {
+  id                  String   @id @default(cuid())
+  teamId              String
+
+  // Worker profile
+  name                String
+  phone               String
+  aadhaarLast4        String?
+  photo               String?
+
+  // Skills
+  skills              String[] // ["weeding", "transplanting", "harvesting"]
+  experience          Int?     // Years
+  preferredCrops      String[] // ["cotton", "rice", "chilli"]
+
+  // Availability
+  isAvailable         Boolean  @default(true)
+  unavailableFrom     DateTime?
+  unavailableTo       DateTime?
+  unavailableReason   String?
+
+  // Rate
+  dailyRate           Float    // INR per day
+
+  // Bank details (for direct payment)
+  bankAccountNumber   String?  // Encrypted
+  bankIfsc            String?
+  bankAccountName     String?
+  upiId               String?
+
+  // Stats
+  daysWorked          Int      @default(0)
+  rating              Float    @default(0)
+  noShowCount         Int      @default(0)
+
+  isActive            Boolean  @default(true)
+  joinedAt            DateTime @default(now())
+
+  team                LaborTeam    @relation(fields: [teamId], references: [id])
+  attendance          Attendance[]
+
+  @@index([teamId, isAvailable])
+  @@map("team_members")
+}
+
+model JobPosting {
+  id                      String   @id @default(cuid())
+  farmerId                String
+
+  // Job details
+  title                   Json     // { "en": "Need 5 laborers for cotton picking", "te": "..." }
+  description             Json?
+
+  // Requirements
+  skillRequired           String   // "harvesting" | "weeding" | "transplanting" | etc.
+  workersNeeded           Int
+
+  // Schedule
+  startDate               DateTime
+  endDate                 DateTime
+  daysNeeded              Int
+  slotType                String   @default("FULL_DAY") // "MORNING" | "AFTERNOON" | "FULL_DAY"
+
+  // Location
+  farmLocation            Json     // { lat, lng, village, mandal, district, state }
+  farmSize                Float?   // Acres
+  cropType                String?
+
+  // Budget
+  budgetPerWorkerPerDay   Float?
+  totalBudget             Float?
+
+  // Status
+  status                  String   @default("OPEN")
+  // "OPEN" | "BIDDING" | "ASSIGNED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED"
+
+  // Assignment
+  assignedBidId           String?  @unique
+  assignedTeamId          String?
+
+  // Metadata
+  viewCount               Int      @default(0)
+  bidCount                Int      @default(0)
+
+  expiresAt               DateTime
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  farmer                  User     @relation(fields: [farmerId], references: [id])
+  assignedBid             Bid?     @relation("AssignedBid", fields: [assignedBidId], references: [id])
+  bids                    Bid[]    @relation("JobBids")
+
+  @@index([status, skillRequired])
+  @@index([farmerId, status])
+  @@map("job_postings")
+}
+
+model Bid {
+  id                      String   @id @default(cuid())
+  jobPostingId            String
+  teamId                  String?
+  providerId              String
+
+  // Bid details
+  ratePerWorkerPerDay     Float
+  totalAmount             Float
+  workersOffered          Int
+  message                 Json?    // { "en": "We have experienced cotton pickers...", "te": "..." }
+
+  // Status
+  status                  String   @default("PENDING")
+  // "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN" | "EXPIRED"
+  rejectionReason         String?
+
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  jobPosting              JobPosting      @relation("JobBids", fields: [jobPostingId], references: [id])
+  team                    LaborTeam?      @relation(fields: [teamId], references: [id])
+  provider                ServiceProvider @relation(fields: [providerId], references: [id])
+  assignedTo              JobPosting?     @relation("AssignedBid")
+
+  @@unique([jobPostingId, providerId])
+  @@index([jobPostingId, status])
+  @@map("bids")
+}
+
+model Attendance {
+  id                  String   @id @default(cuid())
+  bookingId           String
+  teamMemberId        String?
+  workerId            String
+
+  date                DateTime @db.Date
+
+  // Check-in
+  checkInTime         DateTime?
+  checkInLat          Float?
+  checkInLng          Float?
+  checkInDistance      Float?   // Distance from farm in meters
+  checkInQrCode       String?
+  checkInPhoto        String?
+  checkInVerified     Boolean  @default(false)
+
+  // Check-out
+  checkOutTime        DateTime?
+  checkOutLat         Float?
+  checkOutLng         Float?
+  checkOutDistance     Float?
+  checkOutQrCode      String?
+  checkOutPhoto       String?
+  checkOutVerified    Boolean  @default(false)
+
+  // Hours
+  hoursWorked         Float?
+  overtimeHours       Float?
+  breakMinutes        Int?
+
+  // Status
+  status              String   @default("ABSENT")
+  // "PRESENT" | "ABSENT" | "HALF_DAY" | "LATE" | "SUBSTITUTE" | "NO_SHOW"
+
+  // Substitute
+  isSubstitute        Boolean  @default(false)
+  substitutedFor      String?
+
+  // Payment
+  dailyAmount         Float?
+  overtimeAmount      Float?
+  deductions          Float?
+  netAmount           Float?
+  paymentStatus       String   @default("PENDING") // "PENDING" | "PROCESSED" | "PAID"
+
+  notes               String?
+
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  teamMember          TeamMember? @relation(fields: [teamMemberId], references: [id])
+
+  @@unique([bookingId, workerId, date])
+  @@index([bookingId, date])
+  @@index([teamMemberId, date])
+  @@map("attendance")
 }

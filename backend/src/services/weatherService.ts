@@ -1,4 +1,7 @@
 import { config } from '../config';
+import { createChildLogger } from '../config/logger';
+
+const log = createChildLogger('weather');
 
 // Simple in-memory cache
 const cache = new Map<string, { data: unknown; expiresAt: number }>();
@@ -53,7 +56,7 @@ export class WeatherService {
         setCache(cacheKey, data);
         return data;
       } catch (err) {
-        console.error('[Weather] OpenWeatherMap API failed, falling back to mock:', err);
+        log.error({ err }, 'OpenWeatherMap API failed, falling back to mock');
       }
     }
 

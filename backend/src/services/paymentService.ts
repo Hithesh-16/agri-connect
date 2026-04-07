@@ -108,7 +108,7 @@ export class PaymentService {
       platformFee,
       gstOnFee,
       tdsAmount,
-      razorpayKeyId: razorpayKeyId || 'mock_key',
+      razorpayKeyId: env.razorpayKeyId || 'mock_key',
     };
   }
 
@@ -120,9 +120,9 @@ export class PaymentService {
     if (!payment) throw new Error('Payment not found');
 
     // Verify signature
-    if (razorpayKeySecret) {
+    if (env.razorpayKeySecret) {
       const expectedSignature = crypto
-        .createHmac('sha256', razorpayKeySecret)
+        .createHmac('sha256', env.razorpayKeySecret)
         .update(`${razorpayOrderId}|${razorpayPaymentId}`)
         .digest('hex');
 

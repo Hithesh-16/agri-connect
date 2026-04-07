@@ -7,6 +7,7 @@ import { requireRole } from '../middleware/permissions';
 import { AuthRequest, paginate, paginatedResponse } from '../types';
 import { PaymentService } from '../services/paymentService';
 import { prisma } from '../config';
+import { env } from '../config/env';
 import { createChildLogger } from '../config/logger';
 
 const log = createChildLogger('payments');
@@ -199,7 +200,7 @@ router.get('/earnings', authenticate, async (req: AuthRequest, res: Response) =>
 // POST /api/payments/webhook — Razorpay webhook handler
 router.post('/webhook', async (req: Request, res: Response) => {
   try {
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const webhookSecret = env.razorpayWebhookSecret;
     if (webhookSecret) {
       const signature = req.headers['x-razorpay-signature'] as string;
       const expectedSignature = crypto

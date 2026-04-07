@@ -3,14 +3,15 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuid } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
+import { env } from '../config/env';
 import { createChildLogger } from '../config/logger';
 
 const log = createChildLogger('upload');
 
-const s3Bucket = process.env.S3_BUCKET;
-const s3Region = process.env.S3_REGION || 'ap-south-1';
-const cdnUrl = process.env.CDN_URL;
-const uploadDir = process.env.UPLOAD_DIR || './uploads';
+const s3Bucket = env.s3Bucket;
+const s3Region = env.s3Region;
+const cdnUrl = env.cdnUrl;
+const uploadDir = env.uploadDir;
 
 let s3: S3Client | null = null;
 if (s3Bucket) {

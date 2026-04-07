@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { PredictionService } from '../services/predictionService';
+import { createChildLogger } from '../config/logger';
 
 const router = Router();
+const log = createChildLogger('predictions');
 
 // GET /api/predictions/:cropId
 router.get('/:cropId', async (req: Request, res: Response) => {
@@ -25,7 +27,7 @@ router.get('/:cropId', async (req: Request, res: Response) => {
       res.status(404).json({ success: false, error: err.message });
       return;
     }
-    console.error('[Predictions] Error:', err);
+    log.error({ err }, 'Prediction failed');
     res.status(500).json({ success: false, error: 'Failed to generate prediction.' });
   }
 });

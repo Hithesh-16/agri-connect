@@ -1,17 +1,15 @@
 import { prisma } from '../config';
+import { env } from '../config/env';
 import { createChildLogger } from '../config/logger';
 
 const log = createChildLogger('push-service');
 
-// Firebase Admin SDK — lazy-loaded to avoid startup failure when not configured
 let firebaseAdmin: any = null;
 
 function getFirebaseAdmin() {
   if (firebaseAdmin) return firebaseAdmin;
 
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  const { firebaseProjectId: projectId, firebaseClientEmail: clientEmail, firebasePrivateKey: privateKey } = env;
 
   if (!projectId || !clientEmail || !privateKey) {
     log.warn('Firebase not configured — push notifications disabled');

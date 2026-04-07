@@ -1,4 +1,7 @@
 import { prisma, config } from '../config';
+import { createChildLogger } from '../config/logger';
+
+const log = createChildLogger('otp');
 
 export class OtpService {
   static generateOtp(): string {
@@ -26,7 +29,7 @@ export class OtpService {
     // In production, send OTP via SMS gateway (MSG91, Twilio, etc.)
     // For development, log the OTP
     if (config.nodeEnv === 'development') {
-      console.log(`[OTP] ${mobile}: ${otp}`);
+      log.debug({ mobile }, 'Dev OTP generated');
     }
 
     return { message: 'OTP sent successfully.' };

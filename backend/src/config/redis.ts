@@ -1,9 +1,10 @@
 import Redis from 'ioredis';
 import { createChildLogger } from './logger';
+import { env } from './env';
 
 const log = createChildLogger('redis');
 
-const redisUrl = process.env.REDIS_URL;
+const redisUrl = env.redisUrl;
 
 let redis: Redis | null = null;
 

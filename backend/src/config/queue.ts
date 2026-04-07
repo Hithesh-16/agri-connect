@@ -1,9 +1,10 @@
 import { Queue, Worker, Job } from 'bullmq';
 import { createChildLogger } from './logger';
+import { env } from './env';
 
 const log = createChildLogger('queue');
 
-const redisUrl = process.env.REDIS_URL;
+const redisUrl = env.redisUrl;
 
 function getConnection() {
   if (!redisUrl) return null;

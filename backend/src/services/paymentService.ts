@@ -313,4 +313,117 @@ export class PaymentService {
       recentPayouts: payouts,
     };
   }
+
+  // ─── Orchestration methods for controllers ────────────
+
+  static async createOrderForUser(userId: string, bookingId: string, flowType?: string) {
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    if (!booking || booking.farmerId !== userId) {
+      throw new (await import('../errors/app-error')).NotFoundError('Booking');
+    }
+    return PaymentService.createOrder(bookingId, flowType);
+  }
+
+  static async releaseEscrowForUser(userId: string, paymentId: string) {
+    const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
+    if (!payment || payment.payerId !== userId) {
+      throw new (await import('../errors/app-error')).ForbiddenError('Not authorized to release this payment.');
+    }
+    return PaymentService.releaseEscrow(paymentId, userId);
+  }
+
+  static async refundForUser(userId: string, paymentId: string, reason: string, amount?: number) {
+    const payment = await prisma.payment.findUnique({ where: { id: paymentId } });
+    if (!payment || payment.payerId !== userId) {
+      throw new (await import('../errors/app-error')).ForbiddenError('Not authorized.');
+    }
+    return PaymentService.processRefund(paymentId, reason, amount);
+  }
+
+  static async getOrCreateWallet(userId: string) {
+    let wallet = await prisma.wallet.findUnique({
+      where: { userId },
+      include: { transactions: { orderBy: { createdAt: 'desc' }, take: 10 } },
+    });
+    if (!wallet) {
+      wallet = await prisma.wallet.create({
+        data: { userId },
+        include: { transactions: true },
+      });
+    }
+    return wallet;
+  }
+
+  static async addWalletFunds(userId: string, amount: number) {
+    const wallet = await prisma.wallet.upsert({
+      where: { userId },
+      update: { balance: { increment: amount } },
+      create: { userId, balance: amount },
+    });
+
+    await prisma.walletTransaction.create({
+      data: {
+        walletId: wallet.id,
+        amount,
+        type: 'CREDIT',
+        source: 'TOPUP',
+        description: `Added ₹${amount} to wallet`,
+        balanceBefore: Number(wallet.balance) - amount,
+        balanceAfter: Number(wallet.balance),
+      },
+    });
+
+    return { balance: wallet.balance };
+  }
+
+  static async getEarningsForUser(userId: string) {
+    const provider = await prisma.serviceProvider.findUnique({ where: { userId } });
+    if (!provider) {
+      throw new (await import('../errors/app-error')).NotFoundError('Provider');
+    }
+    return PaymentService.getProviderEarnings(provider.id);
+  }
+
+  static async handleWebhook(event: string, payload: any) {
+    switch (event) {
+      case 'payment.captured': {
+        const rpPaymentId = payload.payment.entity.id;
+        const rpOrderId = payload.payment.entity.order_id;
+        log.info({ event, rpPaymentId, rpOrderId }, 'Webhook: payment captured');
+        const payment = await prisma.payment.findUnique({ where: { razorpayOrderId: rpOrderId } });
+        if (payment && payment.status === 'PENDING') {
+          await prisma.payment.update({
+            where: { id: payment.id },
+            data: { status: 'CAPTURED', razorpayPaymentId: rpPaymentId, method: payload.payment.entity.method?.toUpperCase() },
+          });
+        }
+        break;
+      }
+      case 'payment.failed': {
+        const rpOrderId = payload.payment.entity.order_id;
+        log.warn({ event, rpOrderId }, 'Webhook: payment failed');
+        await prisma.payment.updateMany({
+          where: { razorpayOrderId: rpOrderId, status: 'PENDING' },
+          data: { status: 'FAILED', failureReason: payload.payment.entity.error_description },
+        });
+        break;
+      }
+      case 'refund.processed':
+        log.info({ event }, 'Webhook: refund processed');
+        break;
+      default:
+        log.debug({ event }, 'Unhandled webhook event');
+    }
+  }
+
+  static async getInvoice(invoiceId: string) {
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: { payment: { select: { payerId: true, payeeProviderId: true, status: true } } },
+    });
+    if (!invoice) {
+      throw new (await import('../errors/app-error')).NotFoundError('Invoice');
+    }
+    return invoice;
+  }
 }

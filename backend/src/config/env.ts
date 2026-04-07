@@ -1,15 +1,11 @@
-import { createChildLogger } from './logger';
-
-const log = createChildLogger('env');
-
 // ─── GUARDS ─────────────────────────────────────────────
+// NOTE: This file must NOT import logger.ts to avoid circular deps
+// (logger → config/index → env → logger)
 
 function requireEnv(key: string): string {
   const value = process.env[key];
   if (!value) {
-    const message = `Missing required environment variable: ${key}`;
-    log.fatal(message);
-    throw new Error(message);
+    throw new Error(`Missing required environment variable: ${key}`);
   }
   return value;
 }
@@ -26,7 +22,6 @@ const isTest = nodeEnv === 'test';
 const isProd = nodeEnv === 'production';
 
 // ─── TYPED ENV OBJECT ───────────────────────────────────
-// Single source of truth for ALL process.env access.
 
 export const env = {
   nodeEnv,
@@ -54,7 +49,7 @@ export const env = {
   otpExpiryMinutes: 5,
   universalOtp: isDev ? '123456' : null,
 
-  // Redis (optional — features degrade gracefully)
+  // Redis (optional)
   redisUrl: process.env.REDIS_URL || '',
 
   // External APIs (optional)
@@ -64,17 +59,17 @@ export const env = {
   // Sentry (optional)
   sentryDsn: process.env.SENTRY_DSN || '',
 
-  // Razorpay (optional — stubs when not configured)
+  // Razorpay (optional)
   razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || '',
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
 
-  // Firebase (optional — stubs when not configured)
+  // Firebase (optional)
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID || '',
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
   firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY || '',
 
-  // MSG91 SMS (optional — stubs when not configured)
+  // MSG91 SMS (optional)
   msg91AuthKey: process.env.MSG91_AUTH_KEY || '',
   msg91SenderId: optionalEnv('MSG91_SENDER_ID', 'KISANC'),
   msg91OtpTemplateId: process.env.MSG91_OTP_TEMPLATE_ID || '',
